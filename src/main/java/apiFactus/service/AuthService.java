@@ -2,7 +2,9 @@ package apiFactus.service;
 
 import apiFactus.dto.AuthRequestDTO;
 import apiFactus.dto.AuthResponseDTO;
-import org.springframework.beans.factory.annotation.Autowired;
+import apiFactus.utils.TokenUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -14,138 +16,158 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.LocalDateTime;
-
-
 @Service
 public class AuthService {
 
+    private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
+
     private final RestTemplate authRestTemplate;
+    private final TokenUtil tokenUtil;
+    private final String apiUrl;
+    private final String clientId;
+    private final String clientSecret;
+    private final String username;
+    private final String password;
 
-    @Value("${factus.api.url}")
-    private String apiUrl;
-
-    @Value("${factus.api.client-id}")
-    private String clientId;
-
-    @Value("${factus.api.client-secret}")
-    private String clientSecret;
-
-    @Value("${factus.api.email}")
-    private String username;
-
-    @Value("${factus.api.password}")
-    private String password;
-
-
-    private String accessToken;
-    private String refreshToken;
-    private LocalDateTime tokenExpiration;
-
-    // Usa @Qualifier para especificar cuál bean de RestTemplate quieres
-    @Autowired
-    public AuthService(@Qualifier("authRestTemplate") RestTemplate authRestTemplate) {
+    public AuthService(
+            @Qualifier("authRestTemplate") RestTemplate authRestTemplate,
+            TokenUtil tokenUtil,
+            @Value("${factus.api.url}") String apiUrl,
+            @Value("${factus.api.client-id}") String clientId,
+            @Value("${factus.api.client-secret}") String clientSecret,
+            @Value("${factus.api.email}") String username,
+            @Value("${factus.api.password}") String password) {
         this.authRestTemplate = authRestTemplate;
+        this.tokenUtil = tokenUtil;
+        this.apiUrl = apiUrl;
+        this.clientId = clientId;
+        this.clientSecret = clientSecret;
+        this.username = username;
+        this.password = password;
     }
 
     public String getAccessToken() {
-        if (accessToken == null || LocalDateTime.now().isAfter(tokenExpiration)) {
+        if (!tokenUtil.isTokenValid()) {
+            // Si el token no es válido pero está a punto de expirar, intentamos refrescarlo
+            if (tokenUtil.getRefreshToken() != null && tokenUtil.isTokenAboutToExpire()) {
+                refreshToken();
+            } else {
+                // Si no se puede refrescar, autenticamos de nuevo
+                authenticate();
+            }
+        }
+        return tokenUtil.getAccessToken();
+    }
+
+    public void authenticate() {
+        AuthRequestDTO authRequestDTO = new AuthRequestDTO();
+        authRequestDTO.setGrant_type("password");
+        authRequestDTO.setClient_id(clientId);
+        authRequestDTO.setClient_secret(clientSecret);
+        authRequestDTO.setUsername(username);
+        authRequestDTO.setPassword(password);
+
+        AuthResponseDTO authResponse = authenticate(authRequestDTO);
+        tokenUtil.setTokenInfo(
+                authResponse.getAccessToken(),
+                authResponse.getRefreshToken(),
+                authResponse.getExpiresIn()
+        );
+    }
+
+    public AuthResponseDTO authenticate(AuthRequestDTO authRequestDTO) {
+        HttpEntity<MultiValueMap<String, String>> request = buildAuthRequest(authRequestDTO);
+
+        logger.debug("Enviando solicitud de autenticación a: {}", apiUrl + "/oauth/token");
+        logger.debug("Headers: {}", request.getHeaders());
+        logger.debug("Body: {}", request.getBody());
+
+        try {
+            ResponseEntity<AuthResponseDTO> response = authRestTemplate.postForEntity(
+                    apiUrl + "/oauth/token",
+                    request,
+                    AuthResponseDTO.class);
+
+            logger.debug("Respuesta recibida: Status={}, Body={}", response.getStatusCode(), response.getBody());
+
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                AuthResponseDTO authResponse = response.getBody();
+                if ((authRequestDTO.getUsername() == null || authRequestDTO.getUsername().equals(username)) &&
+                        (authRequestDTO.getPassword() == null || authRequestDTO.getPassword().equals(password))) {
+                    tokenUtil.setTokenInfo(
+                            authResponse.getAccessToken(),
+                            authResponse.getRefreshToken(),
+                            authResponse.getExpiresIn()
+                    );
+                }
+                return authResponse;
+            } else {
+                logger.error("Fallo en la autenticación con Factus API: Status={}, Body={}", response.getStatusCode(), response.getBody());
+                throw new RuntimeException("Fallo en la autenticación con Factus API: Status=" + response.getStatusCode() + ", Body=" + response.getBody());
+            }
+        } catch (Exception e) {
+            logger.error("Error al autenticar con Factus API: {}", e.getMessage(), e);
+            throw new RuntimeException("Error al autenticar con Factus API: " + e.getMessage(), e);
+        }
+    }
+
+    public void refreshToken() {
+        HttpEntity<MultiValueMap<String, String>> request = buildRefreshRequest();
+
+        logger.debug("Enviando solicitud de refresh token a: {}", apiUrl + "/oauth/token");
+        logger.debug("Headers: {}", request.getHeaders());
+        logger.debug("Body: {}", request.getBody());
+
+        try {
+            ResponseEntity<AuthResponseDTO> response = authRestTemplate.postForEntity(
+                    apiUrl + "/oauth/token",
+                    request,
+                    AuthResponseDTO.class);
+
+            logger.debug("Respuesta recibida: Status={}, Body={}", response.getStatusCode(), response.getBody());
+
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                AuthResponseDTO authResponse = response.getBody();
+                tokenUtil.setTokenInfo(
+                        authResponse.getAccessToken(),
+                        authResponse.getRefreshToken(),
+                        authResponse.getExpiresIn()
+                );
+            } else {
+                authenticate();
+            }
+        } catch (Exception e) {
+            logger.error("Error al refrescar el token: {}", e.getMessage(), e);
             authenticate();
         }
-        return accessToken;
     }
 
-    // Método original que usa credenciales de configuración
-    public void authenticate() {
+    private HttpEntity<MultiValueMap<String, String>> buildAuthRequest(AuthRequestDTO authRequestDTO) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
-        MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-        map.add("grant_type", "password");
-        map.add("client_id", clientId);
-        map.add("client_secret", clientSecret);
-        map.add("username", username);
-        map.add("password", password);
-
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
-
-        ResponseEntity<AuthResponseDTO> response = authRestTemplate.postForEntity(
-                apiUrl + "/oauth/token",
-                request,
-                AuthResponseDTO.class);
-
-        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-            AuthResponseDTO authResponse = response.getBody();
-            accessToken = authResponse.getAccessToken();
-            refreshToken = authResponse.getRefreshToken();
-            // Establecer expiración (típicamente 3600 segundos = 1 hora)
-            tokenExpiration = LocalDateTime.now().plusSeconds(authResponse.getExpiresIn());
-        } else {
-            throw new RuntimeException("Fallo en la autenticación con Factus API");
-        }
-    }
-
-    // Nuevo método que acepta AuthRequestDTO
-    public AuthResponseDTO authenticate(AuthRequestDTO authRequestDTO) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        headers.set("Accept", "application/json");
 
         MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
         map.add("grant_type", authRequestDTO.getGrant_type() != null ? authRequestDTO.getGrant_type() : "password");
-
-        // Si se proporcionan credenciales en el DTO, úsalas; de lo contrario, usa los valores de configuración
         map.add("client_id", authRequestDTO.getClient_id() != null ? authRequestDTO.getClient_id() : clientId);
         map.add("client_secret", authRequestDTO.getClient_secret() != null ? authRequestDTO.getClient_secret() : clientSecret);
         map.add("username", authRequestDTO.getUsername() != null ? authRequestDTO.getUsername() : username);
         map.add("password", authRequestDTO.getPassword() != null ? authRequestDTO.getPassword() : password);
 
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
-
-        ResponseEntity<AuthResponseDTO> response = authRestTemplate.postForEntity(
-                apiUrl + "/oauth/token",
-                request,
-                AuthResponseDTO.class);
-
-        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-            AuthResponseDTO authResponse = response.getBody();
-            // Actualiza los tokens almacenados en memoria sólo si se usaron las credenciales por defecto
-            if ((authRequestDTO.getUsername() == null || authRequestDTO.getUsername().equals(username)) &&
-                    (authRequestDTO.getPassword() == null || authRequestDTO.getPassword().equals(password))) {
-                accessToken = authResponse.getAccessToken();
-                refreshToken = authResponse.getRefreshToken();
-                tokenExpiration = LocalDateTime.now().plusSeconds(authResponse.getExpiresIn());
-            }
-            return authResponse;
-        } else {
-            throw new RuntimeException("Fallo en la autenticación con Factus API");
-        }
+        return new HttpEntity<>(map, headers);
     }
 
-    public void refreshToken() {
+    private HttpEntity<MultiValueMap<String, String>> buildRefreshRequest() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        headers.set("Accept", "application/json");
 
         MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
         map.add("grant_type", "refresh_token");
         map.add("client_id", clientId);
         map.add("client_secret", clientSecret);
-        map.add("refresh_token", refreshToken);
+        map.add("refresh_token", tokenUtil.getRefreshToken());
 
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
-
-        ResponseEntity<AuthResponseDTO> response = authRestTemplate.postForEntity(
-                apiUrl + "/oauth/token",
-                request,
-                AuthResponseDTO.class);
-
-        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-            AuthResponseDTO authResponse = response.getBody();
-            accessToken = authResponse.getAccessToken();
-            refreshToken = authResponse.getRefreshToken();
-            tokenExpiration = LocalDateTime.now().plusSeconds(authResponse.getExpiresIn());
-        } else {
-            // Si falla el refresh, autenticamos de nuevo
-            authenticate();
-        }
+        return new HttpEntity<>(map, headers);
     }
 }

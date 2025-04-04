@@ -40,7 +40,7 @@ public class InvoiceService {
 
     @Autowired
     public InvoiceService(
-            @Qualifier("restTemplateWithInterceptor") RestTemplate restTemplate,
+            @Qualifier("apiRestTemplate") RestTemplate restTemplate,
             AuthService authService) {
         this.restTemplate = restTemplate;
         this.authService = authService;
