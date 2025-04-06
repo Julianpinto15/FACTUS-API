@@ -14,7 +14,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/oauth/token", "/oauth/refresh").permitAll() // Permitir acceso público
+                        .requestMatchers("/oauth/token", "/oauth/refresh").permitAll()
+                        .requestMatchers("/invoices").authenticated()
                         .anyRequest().authenticated() // Proteger otros endpoints
                 )
                 .csrf(csrf -> csrf.disable()); // Deshabilitar CSRF

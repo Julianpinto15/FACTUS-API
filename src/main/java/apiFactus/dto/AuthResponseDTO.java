@@ -16,6 +16,9 @@ public class AuthResponseDTO {
     @JsonProperty("refresh_token")
     private String refreshToken;
 
+    public AuthResponseDTO() {
+    }
+
     public AuthResponseDTO(String accessToken, String tokenType, Integer expiresIn, String refreshToken) {
         this.accessToken = accessToken;
         this.tokenType = tokenType;

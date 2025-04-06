@@ -16,12 +16,10 @@ public class WithholdingTax {
     @JoinColumn(name = "invoice_item_id")
     private InvoiceItem invoiceItem;
 
-    @Column(name = "code")
     private String code;
 
     @Column(name = "withholding_tax_rate")
-    private String withholdingTaxRate;
-
+    private Double withholdingTaxRate; // Cambiado a Double
 
     public Long getId() {
         return id;
@@ -47,11 +45,11 @@ public class WithholdingTax {
         this.code = code;
     }
 
-    public String getWithholdingTaxRate() {
+    public Double getWithholdingTaxRate() {
         return withholdingTaxRate;
     }
 
-    public void setWithholdingTaxRate(String withholdingTaxRate) {
+    public void setWithholdingTaxRate(Double withholdingTaxRate) {
         this.withholdingTaxRate = withholdingTaxRate;
     }
 }

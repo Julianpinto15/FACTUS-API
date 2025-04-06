@@ -11,6 +11,8 @@ import apiFactus.model.WithholdingTax;
 import apiFactus.repository.CustomerRepository;
 import apiFactus.repository.InvoiceRepository;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +27,8 @@ import java.util.List;
 
 @Service
 public class InvoiceService {
+
+    private static final Logger logger = LoggerFactory.getLogger(InvoiceService.class);
 
     private final RestTemplate restTemplate;
     private final AuthService authService;
@@ -50,14 +54,15 @@ public class InvoiceService {
     public InvoiceResponseDTO createInvoice(InvoiceRequestDTO invoiceRequest) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(authService.getAccessToken());
+        headers.set("Accept", "application/json");
+        // El token será añadido automáticamente por el TokenInterceptor
 
-        // El token será añadido automáticamente por el interceptor
         HttpEntity<InvoiceRequestDTO> request = new HttpEntity<>(invoiceRequest, headers);
 
         try {
+            logger.debug("Enviando solicitud para crear factura a: {}", apiUrl + "/v1/bills/validate");
             ResponseEntity<InvoiceResponseDTO> response = restTemplate.postForEntity(
-                    apiUrl + "/api/v1/invoice",
+                    apiUrl + "/v1/bills/validate",
                     request,
                     InvoiceResponseDTO.class);
 
@@ -70,11 +75,11 @@ public class InvoiceService {
         } catch (HttpClientErrorException.Unauthorized e) {
             // Si hay error de autorización, refrescamos el token y lo intentamos de nuevo
             authService.refreshToken();
-            headers.setBearerAuth(authService.getAccessToken());
             request = new HttpEntity<>(invoiceRequest, headers);
 
+            logger.debug("Reintentando solicitud para crear factura a: {}", apiUrl + "/v1/bills/validate");
             ResponseEntity<InvoiceResponseDTO> response = restTemplate.postForEntity(
-                    apiUrl + "/api/v1/invoice",
+                    apiUrl + "/v1/bills/validate",
                     request,
                     InvoiceResponseDTO.class);
 
@@ -84,10 +89,14 @@ public class InvoiceService {
             }
 
             return response.getBody();
+        } catch (Exception e) {
+            logger.error("Error al crear la factura: {}", e.getMessage(), e);
+            throw new RuntimeException("Error al crear la factura: " + e.getMessage(), e);
         }
     }
 
-    private void saveInvoiceToDatabase(InvoiceRequestDTO invoiceRequest, InvoiceResponseDTO invoiceResponse) {
+    @Transactional
+    public void saveInvoiceToDatabase(InvoiceRequestDTO invoiceRequest, InvoiceResponseDTO invoiceResponse) {
         // Buscar o crear el cliente
         Customer customer = customerRepository.findByIdentification(invoiceRequest.getCustomer().getIdentification());
         if (customer == null) {
@@ -95,7 +104,7 @@ public class InvoiceService {
             customer.setIdentification(invoiceRequest.getCustomer().getIdentification());
             customer.setDv(invoiceRequest.getCustomer().getDv());
             customer.setCompany(invoiceRequest.getCustomer().getCompany());
-            customer.setTradeName(invoiceRequest.getCustomer().getTrade_name());
+            customer.setTradeName(invoiceRequest.getCustomer().getTrade_name()); // Ajustado a setTradeName
             customer.setNames(invoiceRequest.getCustomer().getNames());
             customer.setAddress(invoiceRequest.getCustomer().getAddress());
             customer.setEmail(invoiceRequest.getCustomer().getEmail());
@@ -116,7 +125,10 @@ public class InvoiceService {
         invoice.setStatus(invoiceResponse.getData().getStatus());
         invoice.setReferenceCode(invoiceRequest.getReference_code());
         invoice.setObservation(invoiceRequest.getObservation());
-        invoice.setPaymentForm(invoiceRequest.getPayment_form());
+        // Ajustar payment_form (extraer el código del objeto PaymentFormDTO)
+        if (invoiceRequest.getPayment_form() != null) {
+            invoice.setPaymentForm(invoiceRequest.getPayment_form().getCode());
+        }
         invoice.setPaymentDueDate(invoiceRequest.getPayment_due_date());
         invoice.setPaymentMethodCode(invoiceRequest.getPayment_method_code());
         invoice.setCreatedAt(LocalDateTime.now());
@@ -171,14 +183,15 @@ public class InvoiceService {
     public InvoiceResponseDTO validateInvoice(Integer invoiceId) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(authService.getAccessToken());
+        headers.set("Accept", "application/json");
+        // El token será añadido automáticamente por el TokenInterceptor
 
-        // El token será añadido automáticamente por el interceptor
         HttpEntity<String> request = new HttpEntity<>(headers);
 
         try {
+            logger.debug("Enviando solicitud para validar factura a: {}", apiUrl + "/v1/bills/validate/" + invoiceId);
             ResponseEntity<InvoiceResponseDTO> response = restTemplate.exchange(
-                    apiUrl + "/api/v1/invoice/" + invoiceId + "/validation",
+                    apiUrl + "/v1/bills/validate/" + invoiceId,
                     HttpMethod.POST,
                     request,
                     InvoiceResponseDTO.class);
@@ -187,16 +200,19 @@ public class InvoiceService {
         } catch (HttpClientErrorException.Unauthorized e) {
             // Si hay error de autorización, refrescamos el token y lo intentamos de nuevo
             authService.refreshToken();
-            headers.setBearerAuth(authService.getAccessToken());
             request = new HttpEntity<>(headers);
 
+            logger.debug("Reintentando solicitud para validar factura a: {}", apiUrl + "/v1/bills/validate/" + invoiceId);
             ResponseEntity<InvoiceResponseDTO> response = restTemplate.exchange(
-                    apiUrl + "/api/v1/invoice/" + invoiceId + "/validation",
+                    apiUrl + "/v1/bills/validate/" + invoiceId,
                     HttpMethod.POST,
                     request,
                     InvoiceResponseDTO.class);
 
             return response.getBody();
+        } catch (Exception e) {
+            logger.error("Error al validar la factura: {}", e.getMessage(), e);
+            throw new RuntimeException("Error al validar la factura: " + e.getMessage(), e);
         }
     }
 }

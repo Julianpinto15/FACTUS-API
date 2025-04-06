@@ -7,12 +7,6 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 public class RestTemplateConfig {
 
-    private final TokenInterceptor tokenInterceptor;
-
-    public RestTemplateConfig(TokenInterceptor tokenInterceptor) {
-        this.tokenInterceptor = tokenInterceptor;
-    }
-
     @Bean(name = "authRestTemplate")
     public RestTemplate authRestTemplate() {
         return new RestTemplate();

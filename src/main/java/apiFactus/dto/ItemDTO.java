@@ -7,16 +7,14 @@ public class ItemDTO {
     private String code_reference;
     private String name;
     private Integer quantity;
-    private Integer discount_rate;
-    private Integer price;
+    private Double discount_rate;
+    private Double price;
     private String tax_rate;
     private Integer unit_measure_id;
     private Integer standard_code_id;
     private Integer is_excluded;
     private Integer tribute_id;
     private List<WithholdingTaxDTO> withholding_taxes;
-
-
 
     public String getCode_reference() {
         return code_reference;
@@ -42,19 +40,19 @@ public class ItemDTO {
         this.quantity = quantity;
     }
 
-    public Integer getDiscount_rate() {
+    public Double getDiscount_rate() {
         return discount_rate;
     }
 
-    public void setDiscount_rate(Integer discount_rate) {
+    public void setDiscount_rate(Double discount_rate) {
         this.discount_rate = discount_rate;
     }
 
-    public Integer getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(Integer price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 
@@ -105,6 +103,4 @@ public class ItemDTO {
     public void setWithholding_taxes(List<WithholdingTaxDTO> withholding_taxes) {
         this.withholding_taxes = withholding_taxes;
     }
-
-
 }

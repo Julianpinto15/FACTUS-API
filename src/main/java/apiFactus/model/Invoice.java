@@ -16,7 +16,7 @@ public class Invoice {
     private Long id;
 
     @Column(name = "factus_invoice_id")
-    private Integer factusInvoiceId;
+    private String factusInvoiceId;
 
     @Column(name = "invoice_number")
     private String invoiceNumber;
@@ -24,23 +24,33 @@ public class Invoice {
     @Column(name = "invoice_uuid")
     private String invoiceUuid;
 
-    @Column(name = "status")
     private String status;
 
     @Column(name = "reference_code")
     private String referenceCode;
 
-    @Column(name = "observation")
     private String observation;
 
     @Column(name = "payment_form")
-    private String paymentForm;
+    private Integer paymentForm; // Cambiado a Integer para coincidir con PaymentFormDTO.code
 
     @Column(name = "payment_due_date")
     private String paymentDueDate;
 
     @Column(name = "payment_method_code")
-    private String paymentMethodCode;
+    private Integer paymentMethodCode; // Cambiado a Integer para coincidir con InvoiceRequestDTO
+
+    @Column(name = "billing_start_date")
+    private String billingStartDate;
+
+    @Column(name = "billing_start_time")
+    private String billingStartTime;
+
+    @Column(name = "billing_end_date")
+    private String billingEndDate;
+
+    @Column(name = "billing_end_time")
+    private String billingEndTime;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -55,20 +65,6 @@ public class Invoice {
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL)
     private List<InvoiceItem> items;
 
-    // Campos para el periodo de facturación
-    @Column(name = "billing_start_date")
-    private String billingStartDate;
-
-    @Column(name = "billing_start_time")
-    private String billingStartTime;
-
-    @Column(name = "billing_end_date")
-    private String billingEndDate;
-
-    @Column(name = "billing_end_time")
-    private String billingEndTime;
-
-
     public Long getId() {
         return id;
     }
@@ -77,11 +73,11 @@ public class Invoice {
         this.id = id;
     }
 
-    public Integer getFactusInvoiceId() {
+    public String getFactusInvoiceId() {
         return factusInvoiceId;
     }
 
-    public void setFactusInvoiceId(Integer factusInvoiceId) {
+    public void setFactusInvoiceId(String factusInvoiceId) {
         this.factusInvoiceId = factusInvoiceId;
     }
 
@@ -125,11 +121,11 @@ public class Invoice {
         this.observation = observation;
     }
 
-    public String getPaymentForm() {
+    public Integer getPaymentForm() {
         return paymentForm;
     }
 
-    public void setPaymentForm(String paymentForm) {
+    public void setPaymentForm(Integer paymentForm) {
         this.paymentForm = paymentForm;
     }
 
@@ -141,44 +137,12 @@ public class Invoice {
         this.paymentDueDate = paymentDueDate;
     }
 
-    public String getPaymentMethodCode() {
+    public Integer getPaymentMethodCode() {
         return paymentMethodCode;
     }
 
-    public void setPaymentMethodCode(String paymentMethodCode) {
+    public void setPaymentMethodCode(Integer paymentMethodCode) {
         this.paymentMethodCode = paymentMethodCode;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public Customer getCustomer() {
-        return customer;
-    }
-
-    public void setCustomer(Customer customer) {
-        this.customer = customer;
-    }
-
-    public List<InvoiceItem> getItems() {
-        return items;
-    }
-
-    public void setItems(List<InvoiceItem> items) {
-        this.items = items;
     }
 
     public String getBillingStartDate() {
@@ -211,5 +175,37 @@ public class Invoice {
 
     public void setBillingEndTime(String billingEndTime) {
         this.billingEndTime = billingEndTime;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
+    }
+
+    public List<InvoiceItem> getItems() {
+        return items;
+    }
+
+    public void setItems(List<InvoiceItem> items) {
+        this.items = items;
     }
 }

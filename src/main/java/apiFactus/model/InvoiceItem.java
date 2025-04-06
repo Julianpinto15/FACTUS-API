@@ -8,51 +8,43 @@ import java.util.List;
 @Entity
 @Table(name = "invoice_items")
 public class InvoiceItem {
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-        @ManyToOne
-        @JoinColumn(name = "invoice_id")
-        private Invoice invoice;
+    @ManyToOne
+    @JoinColumn(name = "invoice_id")
+    private Invoice invoice;
 
-        @ManyToOne
-        @JoinColumn(name = "product_id")
-        private Product product;
+    @Column(name = "code_reference")
+    private String codeReference;
 
-        @Column(name = "code_reference")
-        private String codeReference;
+    private String name;
 
-        @Column(name = "name")
-        private String name;
+    private Integer quantity;
 
-        @Column(name = "quantity")
-        private Integer quantity;
+    @Column(name = "discount_rate")
+    private Double discountRate; // Cambiado a Double
 
-        @Column(name = "discount_rate")
-        private Integer discountRate;
+    private Double price; // Cambiado a Double
 
-        @Column(name = "price")
-        private Integer price;
+    @Column(name = "tax_rate")
+    private String taxRate; // Cambiado a String para coincidir con Factus
 
-        @Column(name = "tax_rate")
-        private String taxRate;
+    @Column(name = "unit_measure_id")
+    private Integer unitMeasureId;
 
-        @Column(name = "unit_measure_id")
-        private Integer unitMeasureId;
+    @Column(name = "standard_code_id")
+    private Integer standardCodeId;
 
-        @Column(name = "standard_code_id")
-        private Integer standardCodeId;
+    @Column(name = "is_excluded")
+    private Integer isExcluded;
 
-        @Column(name = "is_excluded")
-        private Integer isExcluded;
+    @Column(name = "tribute_id")
+    private Integer tributeId;
 
-        @Column(name = "tribute_id")
-        private Integer tributeId;
-
-        @OneToMany(mappedBy = "invoiceItem", cascade = CascadeType.ALL)
-        private List<WithholdingTax> withholdingTaxes;
-
+    @OneToMany(mappedBy = "invoiceItem", cascade = CascadeType.ALL)
+    private List<WithholdingTax> withholdingTaxes;
 
     public Long getId() {
         return id;
@@ -94,19 +86,19 @@ public class InvoiceItem {
         this.quantity = quantity;
     }
 
-    public Integer getDiscountRate() {
+    public Double getDiscountRate() {
         return discountRate;
     }
 
-    public void setDiscountRate(Integer discountRate) {
+    public void setDiscountRate(Double discountRate) {
         this.discountRate = discountRate;
     }
 
-    public Integer getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(Integer price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 

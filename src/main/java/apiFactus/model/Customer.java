@@ -1,8 +1,6 @@
 package apiFactus.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
-
 
 @Entity
 @Table(name = "customers")
@@ -12,17 +10,20 @@ public class Customer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "identification_document_id")
+    private Integer identificationDocumentId;
+
     @Column(name = "identification", nullable = false)
     private String identification;
 
     @Column(name = "dv")
-    private String dv;
+    private Integer dv;
 
     @Column(name = "company")
     private String company;
 
     @Column(name = "trade_name")
-    private String tradeName;
+    private String TradeName;
 
     @Column(name = "names")
     private String names;
@@ -37,17 +38,13 @@ public class Customer {
     private String phone;
 
     @Column(name = "legal_organization_id")
-    private String legalOrganizationId;
+    private Integer LegalOrganizationId;
 
     @Column(name = "tribute_id")
-    private String tributeId;
-
-    @Column(name = "identification_document_id")
-    private String identificationDocumentId;
+    private Integer TributeId;
 
     @Column(name = "municipality_id")
-    private String municipalityId;
-
+    private Integer MunicipalityId;
 
     public Long getId() {
         return id;
@@ -55,6 +52,14 @@ public class Customer {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Integer getIdentificationDocumentId() {
+        return identificationDocumentId;
+    }
+
+    public void setIdentificationDocumentId(Integer identificationDocumentId) {
+        this.identificationDocumentId = identificationDocumentId;
     }
 
     public String getIdentification() {
@@ -65,11 +70,11 @@ public class Customer {
         this.identification = identification;
     }
 
-    public String getDv() {
+    public Integer getDv() {
         return dv;
     }
 
-    public void setDv(String dv) {
+    public void setDv(Integer dv) {
         this.dv = dv;
     }
 
@@ -82,11 +87,11 @@ public class Customer {
     }
 
     public String getTradeName() {
-        return tradeName;
+        return TradeName;
     }
 
     public void setTradeName(String tradeName) {
-        this.tradeName = tradeName;
+        TradeName = tradeName;
     }
 
     public String getNames() {
@@ -121,35 +126,27 @@ public class Customer {
         this.phone = phone;
     }
 
-    public String getLegalOrganizationId() {
-        return legalOrganizationId;
+    public Integer getLegalOrganizationId() {
+        return LegalOrganizationId;
     }
 
-    public void setLegalOrganizationId(String legalOrganizationId) {
-        this.legalOrganizationId = legalOrganizationId;
+    public void setLegalOrganizationId(Integer legalOrganizationId) {
+        LegalOrganizationId = legalOrganizationId;
     }
 
-    public String getTributeId() {
-        return tributeId;
+    public Integer getTributeId() {
+        return TributeId;
     }
 
-    public void setTributeId(String tributeId) {
-        this.tributeId = tributeId;
+    public void setTributeId(Integer tributeId) {
+        TributeId = tributeId;
     }
 
-    public String getIdentificationDocumentId() {
-        return identificationDocumentId;
+    public Integer getMunicipalityId() {
+        return MunicipalityId;
     }
 
-    public void setIdentificationDocumentId(String identificationDocumentId) {
-        this.identificationDocumentId = identificationDocumentId;
-    }
-
-    public String getMunicipalityId() {
-        return municipalityId;
-    }
-
-    public void setMunicipalityId(String municipalityId) {
-        this.municipalityId = municipalityId;
+    public void setMunicipalityId(Integer municipalityId) {
+        MunicipalityId = municipalityId;
     }
 }

@@ -1,35 +1,30 @@
 package apiFactus.config;
 
-import java.io.IOException;
-import java.time.LocalDateTime;
-
 import apiFactus.service.AuthService;
-import apiFactus.utils.TokenUtil;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Component;
 
-
+import java.io.IOException;
 
 @Component
 public class TokenInterceptor implements ClientHttpRequestInterceptor {
 
-    private final TokenUtil tokenUtil;
+    private final AuthService authService;
 
-    public TokenInterceptor(TokenUtil tokenUtil) {
-        this.tokenUtil = tokenUtil;
+    public TokenInterceptor(@Lazy AuthService authService) {
+        this.authService = authService;
     }
 
     @Override
-    public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
-            throws IOException {
-        // Only add the header if we have a token available
-        if (tokenUtil.isTokenValid()) {
-            request.getHeaders().setBearerAuth(tokenUtil.getAccessToken());
+    public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
+        String token = authService.getToken();
+        if (token != null && !token.isEmpty()) {
+            request.getHeaders().set("Authorization", "Bearer " + token);
         }
-
         return execution.execute(request, body);
     }
 }
