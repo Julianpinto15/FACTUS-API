@@ -7,6 +7,9 @@ public class InvoiceData {
     private String invoice_uuid;
     private String status;
 
+    public InvoiceData() {
+    }
+
     public String getId() {
         return id;
     }

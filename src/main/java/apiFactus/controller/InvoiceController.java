@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/invoices")
+@RequestMapping("/v1/bills/validate")
 public class InvoiceController {
 
     private final InvoiceService invoiceService;

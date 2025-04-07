@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 public class UnitMeasure {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String name;
     private String symbol;

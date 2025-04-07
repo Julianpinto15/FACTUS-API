@@ -7,6 +7,9 @@ public class NumberingRangeDTO {
     private Long end_number;
     private String status;
 
+    public NumberingRangeDTO() {
+    }
+
     public Integer getId() {
         return id;
     }

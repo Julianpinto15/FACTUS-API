@@ -5,9 +5,7 @@ public class WithholdingTaxDTO {
     private String code;
     private Double withholding_tax_rate;
 
-    public WithholdingTaxDTO(String code, Double withholding_tax_rate) {
-        this.code = code;
-        this.withholding_tax_rate = withholding_tax_rate;
+    public WithholdingTaxDTO() {
     }
 
     public String getCode() {

@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 public class NumberingRange {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String prefix;
     private Long start_number;

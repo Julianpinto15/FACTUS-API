@@ -16,6 +16,9 @@ public class ItemDTO {
     private Integer tribute_id;
     private List<WithholdingTaxDTO> withholding_taxes;
 
+    public ItemDTO() {
+    }
+
     public String getCode_reference() {
         return code_reference;
     }

@@ -13,6 +13,7 @@ import apiFactus.repository.MunicipalityRepository;
 import apiFactus.repository.NumberingRangeRepository;
 import apiFactus.repository.TributeRepository;
 import apiFactus.repository.UnitMeasureRepository;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -57,6 +58,7 @@ public class DataPersistenceService implements CommandLineRunner {
     }
 
     @Override
+    @Transactional
     public void run(String... args) throws Exception {
         try {
             authService.refreshToken();
@@ -77,26 +79,25 @@ public class DataPersistenceService implements CommandLineRunner {
                     apiUrl + "/v1/numbering-ranges",
                     HttpMethod.GET,
                     null,
-                    new ParameterizedTypeReference<ApiResponseDTO<NumberingRangeDTO>>() {});
+                    new ParameterizedTypeReference<>() {});
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null && response.getBody().getData() != null) {
                 for (NumberingRangeDTO rangeDTO : response.getBody().getData()) {
                     try {
-                        // Eliminar la entidad existente (si existe)
-                        numberingRangeRepository.deleteById(rangeDTO.getId());
-                        numberingRangeRepository.flush(); // Asegurarse de que la eliminación se aplique inmediatamente
+                        // Buscar si la entidad ya existe
+                        NumberingRange existingRange = numberingRangeRepository.findById(rangeDTO.getId())
+                                .orElse(new NumberingRange());
 
-                        // Crear una nueva entidad
-                        logger.debug("Inserting NumberingRange#{}", rangeDTO.getId());
-                        NumberingRange range = new NumberingRange();
-                        range.setId(rangeDTO.getId());
-                        range.setPrefix(rangeDTO.getPrefix());
-                        range.setStart_number(rangeDTO.getStart_number());
-                        range.setEnd_number(rangeDTO.getEnd_number());
-                        range.setStatus(rangeDTO.getStatus());
-                        range.setVersion(0L); // Inicializar el campo version
+                        // Actualizar o crear la entidad
+                        logger.debug("Processing NumberingRange#{}", rangeDTO.getId());
+                        existingRange.setId(rangeDTO.getId());
+                        existingRange.setPrefix(rangeDTO.getPrefix());
+                        existingRange.setStart_number(rangeDTO.getStart_number());
+                        existingRange.setEnd_number(rangeDTO.getEnd_number());
+                        existingRange.setStatus(rangeDTO.getStatus());
+                        // No asignar version manualmente, dejar que Hibernate lo gestione
 
-                        NumberingRange savedRange = numberingRangeRepository.saveAndFlush(range);
+                        NumberingRange savedRange = numberingRangeRepository.save(existingRange);
                         logger.debug("Saved NumberingRange#{} with version {}", savedRange.getId(), savedRange.getVersion());
                     } catch (Exception e) {
                         logger.error("Error saving NumberingRange#{}: {}", rangeDTO.getId(), e.getMessage(), e);
@@ -117,24 +118,23 @@ public class DataPersistenceService implements CommandLineRunner {
                     apiUrl + "/v1/tributes/products?name=",
                     HttpMethod.GET,
                     null,
-                    new ParameterizedTypeReference<ApiResponseDTO<TributeDTO>>() {});
+                    new ParameterizedTypeReference<>() {});
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null && response.getBody().getData() != null) {
                 for (TributeDTO tributeDTO : response.getBody().getData()) {
                     try {
-                        // Eliminar la entidad existente (si existe)
-                        tributeRepository.deleteById(tributeDTO.getId());
-                        tributeRepository.flush(); // Asegurarse de que la eliminación se aplique inmediatamente
+                        // Buscar si la entidad ya existe
+                        Tribute existingTribute = tributeRepository.findById(tributeDTO.getId())
+                                .orElse(new Tribute());
 
-                        // Crear una nueva entidad
-                        logger.debug("Inserting Tribute#{}", tributeDTO.getId());
-                        Tribute tribute = new Tribute();
-                        tribute.setId(tributeDTO.getId());
-                        tribute.setCode(tributeDTO.getCode());
-                        tribute.setName(tributeDTO.getName());
-                        tribute.setVersion(0L); // Inicializar el campo version
+                        // Actualizar o crear la entidad
+                        logger.debug("Processing Tribute#{}", tributeDTO.getId());
+                        existingTribute.setId(tributeDTO.getId());
+                        existingTribute.setCode(tributeDTO.getCode());
+                        existingTribute.setName(tributeDTO.getName());
+                        // No asignar version manualmente, dejar que Hibernate lo gestione
 
-                        Tribute savedTribute = tributeRepository.saveAndFlush(tribute);
+                        Tribute savedTribute = tributeRepository.save(existingTribute);
                         logger.debug("Saved Tribute#{} with version {}", savedTribute.getId(), savedTribute.getVersion());
                     } catch (Exception e) {
                         logger.error("Error saving Tribute#{}: {}", tributeDTO.getId(), e.getMessage(), e);
@@ -155,24 +155,23 @@ public class DataPersistenceService implements CommandLineRunner {
                     apiUrl + "/v1/municipalities",
                     HttpMethod.GET,
                     null,
-                    new ParameterizedTypeReference<ApiResponseDTO<MunicipalityDTO>>() {});
+                    new ParameterizedTypeReference<>() {});
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null && response.getBody().getData() != null) {
                 for (MunicipalityDTO municipalityDTO : response.getBody().getData()) {
                     try {
-                        // Eliminar la entidad existente (si existe)
-                        municipalityRepository.deleteById(municipalityDTO.getId());
-                        municipalityRepository.flush(); // Asegurarse de que la eliminación se aplique inmediatamente
+                        // Buscar si la entidad ya existe
+                        Municipality existingMunicipality = municipalityRepository.findById(municipalityDTO.getId())
+                                .orElse(new Municipality());
 
-                        // Crear una nueva entidad
-                        logger.debug("Inserting Municipality#{}", municipalityDTO.getId());
-                        Municipality municipality = new Municipality();
-                        municipality.setId(municipalityDTO.getId());
-                        municipality.setName(municipalityDTO.getName());
-                        municipality.setDepartment(municipalityDTO.getDepartment());
-                        municipality.setVersion(0L); // Inicializar el campo version
+                        // Actualizar o crear la entidad
+                        logger.debug("Processing Municipality#{}", municipalityDTO.getId());
+                        existingMunicipality.setId(municipalityDTO.getId());
+                        existingMunicipality.setName(municipalityDTO.getName());
+                        existingMunicipality.setDepartment(municipalityDTO.getDepartment());
+                        // No asignar version manualmente, dejar que Hibernate lo gestione
 
-                        Municipality savedMunicipality = municipalityRepository.saveAndFlush(municipality);
+                        Municipality savedMunicipality = municipalityRepository.save(existingMunicipality);
                         logger.debug("Saved Municipality#{} with version {}", savedMunicipality.getId(), savedMunicipality.getVersion());
                     } catch (Exception e) {
                         logger.error("Error saving Municipality#{}: {}", municipalityDTO.getId(), e.getMessage(), e);
@@ -193,24 +192,23 @@ public class DataPersistenceService implements CommandLineRunner {
                     apiUrl + "/v1/measurement-units",
                     HttpMethod.GET,
                     null,
-                    new ParameterizedTypeReference<ApiResponseDTO<UnitMeasureDTO>>() {});
+                    new ParameterizedTypeReference<>() {});
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null && response.getBody().getData() != null) {
                 for (UnitMeasureDTO unitMeasureDTO : response.getBody().getData()) {
                     try {
-                        // Eliminar la entidad existente (si existe)
-                        unitMeasureRepository.deleteById(unitMeasureDTO.getId());
-                        unitMeasureRepository.flush(); // Asegurarse de que la eliminación se aplique inmediatamente
+                        // Buscar si la entidad ya existe
+                        UnitMeasure existingUnitMeasure = unitMeasureRepository.findById(unitMeasureDTO.getId())
+                                .orElse(new UnitMeasure());
 
-                        // Crear una nueva entidad
-                        logger.debug("Inserting UnitMeasure#{}", unitMeasureDTO.getId());
-                        UnitMeasure unitMeasure = new UnitMeasure();
-                        unitMeasure.setId(unitMeasureDTO.getId());
-                        unitMeasure.setName(unitMeasureDTO.getName());
-                        unitMeasure.setSymbol(unitMeasureDTO.getSymbol());
-                        unitMeasure.setVersion(0L); // Inicializar el campo version
+                        // Actualizar o crear la entidad
+                        logger.debug("Processing UnitMeasure#{}", unitMeasureDTO.getId());
+                        existingUnitMeasure.setId(unitMeasureDTO.getId());
+                        existingUnitMeasure.setName(unitMeasureDTO.getName());
+                        existingUnitMeasure.setSymbol(unitMeasureDTO.getSymbol());
+                        // No asignar version manualmente, dejar que Hibernate lo gestione
 
-                        UnitMeasure savedUnitMeasure = unitMeasureRepository.saveAndFlush(unitMeasure);
+                        UnitMeasure savedUnitMeasure = unitMeasureRepository.save(existingUnitMeasure);
                         logger.debug("Saved UnitMeasure#{} with version {}", savedUnitMeasure.getId(), savedUnitMeasure.getVersion());
                     } catch (Exception e) {
                         logger.error("Error saving UnitMeasure#{}: {}", unitMeasureDTO.getId(), e.getMessage(), e);

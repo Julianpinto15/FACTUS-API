@@ -6,6 +6,9 @@ public class ApiResponseDTO<T> {
     private String status;
     private List<T> data;
 
+    public ApiResponseDTO() {
+    }
+
     // Getters y setters
     public String getStatus() {
         return status;

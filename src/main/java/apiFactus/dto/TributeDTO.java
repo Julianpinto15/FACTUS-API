@@ -6,6 +6,9 @@ public class TributeDTO {
     private String code;
     private String name;
 
+    public TributeDTO() {
+    }
+
     public Integer getId() {
         return id;
     }

@@ -7,11 +7,8 @@ public class BillingPeriodDTO {
     private String end_date;
     private String end_time;
 
-    public BillingPeriodDTO(String start_date, String start_time, String end_date, String end_time) {
-        this.start_date = start_date;
-        this.start_time = start_time;
-        this.end_date = end_date;
-        this.end_time = end_time;
+
+    public BillingPeriodDTO() {
     }
 
     public String getStart_date() {

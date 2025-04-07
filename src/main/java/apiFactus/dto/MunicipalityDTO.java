@@ -6,6 +6,9 @@ public class MunicipalityDTO {
     private String name;
     private String department;
 
+    public MunicipalityDTO() {
+    }
+
     public Integer getId() {
         return id;
     }

@@ -6,6 +6,8 @@ public class InvoiceResponseDTO {
     private String message;
     private InvoiceData data;
 
+    public InvoiceResponseDTO() {
+    }
 
     public Boolean getSuccess() {
         return success;

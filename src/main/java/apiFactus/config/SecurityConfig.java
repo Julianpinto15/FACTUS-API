@@ -15,7 +15,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/oauth/token", "/oauth/refresh").permitAll()
-                        .requestMatchers("/invoices").authenticated()
+                        .requestMatchers("/v1/bills/**").permitAll() // Permitir acceso público a /v1/bills/validate
                         .anyRequest().authenticated() // Proteger otros endpoints
                 )
                 .csrf(csrf -> csrf.disable()); // Deshabilitar CSRF

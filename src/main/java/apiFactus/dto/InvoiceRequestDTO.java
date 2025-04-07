@@ -14,16 +14,7 @@ public class InvoiceRequestDTO {
     private CustomerDTO customer;
     private List<ItemDTO> items;
 
-    public InvoiceRequestDTO(Integer numbering_range_id, String reference_code, String observation, Integer payment_method_code, String payment_due_date, PaymentFormDTO payment_form, BillingPeriodDTO billing_period, CustomerDTO customer, List<ItemDTO> items) {
-        this.numbering_range_id = numbering_range_id;
-        this.reference_code = reference_code;
-        this.observation = observation;
-        this.payment_method_code = payment_method_code;
-        this.payment_due_date = payment_due_date;
-        this.payment_form = payment_form;
-        this.billing_period = billing_period;
-        this.customer = customer;
-        this.items = items;
+    public InvoiceRequestDTO() {
     }
 
     public Integer getNumbering_range_id() {

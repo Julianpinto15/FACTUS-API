@@ -6,6 +6,9 @@ public class UnitMeasureDTO {
     private String name;
     private String symbol;
 
+    public UnitMeasureDTO() {
+    }
+
     public Integer getId() {
         return id;
     }

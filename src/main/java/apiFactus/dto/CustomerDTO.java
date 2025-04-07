@@ -15,6 +15,9 @@ public class CustomerDTO {
     private Integer tribute_id;
     private Integer municipality_id;
 
+    public CustomerDTO() {
+    }
+
     public CustomerDTO(Integer identification_document_id, String identification, Integer dv, String company, String trade_name, String names, String address, String email, String phone, Integer legal_organization_id, Integer tribute_id, Integer municipality_id) {
         this.identification_document_id = identification_document_id;
         this.identification = identification;

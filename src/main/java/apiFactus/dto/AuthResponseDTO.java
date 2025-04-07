@@ -19,12 +19,6 @@ public class AuthResponseDTO {
     public AuthResponseDTO() {
     }
 
-    public AuthResponseDTO(String accessToken, String tokenType, Integer expiresIn, String refreshToken) {
-        this.accessToken = accessToken;
-        this.tokenType = tokenType;
-        this.expiresIn = expiresIn;
-        this.refreshToken = refreshToken;
-    }
 
     public String getAccessToken() {
         return accessToken;
