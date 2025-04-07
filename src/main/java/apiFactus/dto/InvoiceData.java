@@ -18,7 +18,7 @@ public class InvoiceData {
     private NumberingRangeDTO numberingRange;
 
     @JsonProperty("billing_period")
-    private BillingPeriodDTO billingPeriod;
+    private List<BillingPeriodDTO> billingPeriod;
 
     @JsonProperty("bill")
     private Bill bill;
@@ -27,7 +27,7 @@ public class InvoiceData {
     private List<Object> relatedDocuments;
 
     @JsonProperty("items")
-    private List<AbstractReadWriteAccess.Item> items;
+    private List<ItemDTO> items;
 
     @JsonProperty("withholding_taxes")
     private List<WithholdingTaxDTO> withholdingTaxes;
@@ -65,11 +65,11 @@ public class InvoiceData {
         this.numberingRange = numberingRange;
     }
 
-    public BillingPeriodDTO getBillingPeriod() {
+    public List<BillingPeriodDTO> getBillingPeriod() {
         return billingPeriod;
     }
 
-    public void setBillingPeriod(BillingPeriodDTO billingPeriod) {
+    public void setBillingPeriod(List<BillingPeriodDTO> billingPeriod) {
         this.billingPeriod = billingPeriod;
     }
 
@@ -89,11 +89,11 @@ public class InvoiceData {
         this.relatedDocuments = relatedDocuments;
     }
 
-    public List<AbstractReadWriteAccess.Item> getItems() {
+    public List<ItemDTO> getItems() {
         return items;
     }
 
-    public void setItems(List<AbstractReadWriteAccess.Item> items) {
+    public void setItems(List<ItemDTO> items) {
         this.items = items;
     }
 

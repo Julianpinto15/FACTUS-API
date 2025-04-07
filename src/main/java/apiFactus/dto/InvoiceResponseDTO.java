@@ -2,6 +2,8 @@ package apiFactus.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.List;
+
 public class InvoiceResponseDTO {
 
     @JsonProperty("status")  // Cambia "success" por "status" y usa String
@@ -12,6 +14,9 @@ public class InvoiceResponseDTO {
 
     @JsonProperty("data")
     private InvoiceData data;
+
+    @JsonProperty("billing_period")
+    private List<BillingPeriodDTO> billingPeriod;
 
     public InvoiceResponseDTO() {
     }
@@ -38,5 +43,13 @@ public class InvoiceResponseDTO {
 
     public void setData(InvoiceData data) {
         this.data = data;
+    }
+
+    public List<BillingPeriodDTO> getBillingPeriod() {
+        return billingPeriod;
+    }
+
+    public void setBillingPeriod(List<BillingPeriodDTO> billingPeriod) {
+        this.billingPeriod = billingPeriod;
     }
 }

@@ -10,6 +10,7 @@ import apiFactus.model.InvoiceItem;
 import apiFactus.model.WithholdingTax;
 import apiFactus.repository.CustomerRepository;
 import apiFactus.repository.InvoiceRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,6 +95,7 @@ public class InvoiceService {
             throw new RuntimeException("Error al crear la factura: " + e.getMessage(), e);
         }
     }
+
 
     @Transactional
     public void saveInvoiceToDatabase(InvoiceRequestDTO invoiceRequest, InvoiceResponseDTO invoiceResponse) {
