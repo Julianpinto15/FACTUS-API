@@ -16,7 +16,7 @@ public class Invoice {
     private Long id;
 
     @Column(name = "factus_invoice_id")
-    private String factusInvoiceId;
+    private Integer factusInvoiceId;
 
     @Column(name = "invoice_number")
     private String invoiceNumber;
@@ -24,7 +24,7 @@ public class Invoice {
     @Column(name = "invoice_uuid")
     private String invoiceUuid;
 
-    private String status;
+    private Integer status;
 
     @Column(name = "reference_code")
     private String referenceCode;
@@ -73,11 +73,11 @@ public class Invoice {
         this.id = id;
     }
 
-    public String getFactusInvoiceId() {
+    public Integer getFactusInvoiceId() {
         return factusInvoiceId;
     }
 
-    public void setFactusInvoiceId(String factusInvoiceId) {
+    public void setFactusInvoiceId(Integer factusInvoiceId) {
         this.factusInvoiceId = factusInvoiceId;
     }
 
@@ -97,11 +97,11 @@ public class Invoice {
         this.invoiceUuid = invoiceUuid;
     }
 
-    public String getStatus() {
+    public Integer getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Integer status) {
         this.status = status;
     }
 

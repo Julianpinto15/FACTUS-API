@@ -20,7 +20,6 @@ public class AuthResponseDTO {
     }
 
 
-
     public String getAccessToken() {
         return accessToken;
     }

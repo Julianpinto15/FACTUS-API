@@ -1,10 +1,19 @@
 package apiFactus.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class BillingPeriodDTO {
 
+    @JsonProperty("start_date")
     private String start_date;
+
+    @JsonProperty("start_time")
     private String start_time;
+
+    @JsonProperty("end_date")
     private String end_date;
+
+    @JsonProperty("end_time")
     private String end_time;
 
 

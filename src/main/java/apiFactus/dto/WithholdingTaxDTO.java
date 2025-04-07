@@ -1,9 +1,20 @@
 package apiFactus.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class WithholdingTaxDTO {
 
+    @JsonAlias({"tribute_code"})
+    @JsonProperty("code")
     private String code;
-    private Double withholding_tax_rate;
+
+    @JsonProperty("name")
+    private String name; // Agregado
+
+    @JsonAlias({"value"})
+    @JsonProperty("withholding_tax_rate")
+    private String value; // Cambiado de withholding_tax_rate a value
 
     public WithholdingTaxDTO() {
     }
@@ -16,12 +27,31 @@ public class WithholdingTaxDTO {
         this.code = code;
     }
 
-    public Double getWithholding_tax_rate() {
-        return withholding_tax_rate;
+    public String getName() {
+        return name;
     }
 
-    public void setWithholding_tax_rate(Double withholding_tax_rate) {
-        this.withholding_tax_rate = withholding_tax_rate;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    // Método para convertir value a Double si es necesario
+    public Double getValueAsDouble() {
+        if (value == null || value.isEmpty()) {
+            return null;
+        }
+        try {
+            return Double.parseDouble(value);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid value format: " + value, e);
+        }
     }
 }
-

@@ -1,11 +1,32 @@
 package apiFactus.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class NumberingRangeDTO {
+
+    @JsonProperty("id")
     private Integer id;
+
+    @JsonProperty("prefix")
     private String prefix;
-    private Long start_number;
-    private Long end_number;
-    private String status;
+
+    @JsonProperty("from")
+    private Long from;  // Cambiado de start_number a from
+
+    @JsonProperty("to")
+    private Long to;  // Cambiado de end_number a to
+
+    @JsonProperty("resolution_number")
+    private String resolutionNumber;
+
+    @JsonProperty("start_date")
+    private String startDate;
+
+    @JsonProperty("end_date")
+    private String endDate;
+
+    @JsonProperty("months")
+    private Integer months;
 
     public NumberingRangeDTO() {
     }
@@ -26,38 +47,64 @@ public class NumberingRangeDTO {
         this.prefix = prefix;
     }
 
-    public Long getStart_number() {
-        return start_number;
+    public Long getFrom() {
+        return from;
     }
 
-    public void setStart_number(Long start_number) {
-        this.start_number = start_number;
+    public void setFrom(Long from) {
+        this.from = from;
     }
 
-    public Long getEnd_number() {
-        return end_number;
+    public Long getTo() {
+        return to;
     }
 
-    public void setEnd_number(Long end_number) {
-        this.end_number = end_number;
+    public void setTo(Long to) {
+        this.to = to;
     }
 
-    public String getStatus() {
-        return status;
+    public String getResolutionNumber() {
+        return resolutionNumber;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setResolutionNumber(String resolutionNumber) {
+        this.resolutionNumber = resolutionNumber;
+    }
+
+    public String getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(String startDate) {
+        this.startDate = startDate;
+    }
+
+    public String getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(String endDate) {
+        this.endDate = endDate;
+    }
+
+    public Integer getMonths() {
+        return months;
+    }
+
+    public void setMonths(Integer months) {
+        this.months = months;
     }
 
     @Override
     public String toString() {
         return "NumberingRangeDTO{" +
-                "id=" + id +
-                ", prefix='" + prefix + '\'' +
-                ", start_number=" + start_number +
-                ", end_number=" + end_number +
-                ", status='" + status + '\'' +
+                "prefix='" + prefix + '\'' +
+                ", from=" + from +
+                ", to=" + to +
+                ", resolutionNumber='" + resolutionNumber + '\'' +
+                ", startDate='" + startDate + '\'' +
+                ", endDate='" + endDate + '\'' +
+                ", months=" + months +
                 '}';
     }
 

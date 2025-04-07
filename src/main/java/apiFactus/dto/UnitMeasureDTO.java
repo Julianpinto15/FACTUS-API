@@ -1,10 +1,17 @@
 package apiFactus.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class UnitMeasureDTO {
 
+    @JsonProperty("id")
     private Integer id;
+
+    @JsonProperty("code")
+    private String code;  // Agregado
+
+    @JsonProperty("name")
     private String name;
-    private String symbol;
 
     public UnitMeasureDTO() {
     }
@@ -25,20 +32,20 @@ public class UnitMeasureDTO {
         this.name = name;
     }
 
-    public String getSymbol() {
-        return symbol;
+    public String getCode() {
+        return code;
     }
 
-    public void setSymbol(String symbol) {
-        this.symbol = symbol;
+    public void setCode(String code) {
+        this.code = code;
     }
 
     @Override
     public String toString() {
         return "UnitMeasureDTO{" +
                 "id=" + id +
+                ", code='" + code + '\'' +
                 ", name='" + name + '\'' +
-                ", symbol='" + symbol + '\'' +
                 '}';
     }
 

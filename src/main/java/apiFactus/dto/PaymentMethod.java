@@ -2,10 +2,7 @@ package apiFactus.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class TributeDTO {
-
-    @JsonProperty("id")
-    private Integer id;
+public class PaymentMethod {
 
     @JsonProperty("code")
     private String code;
@@ -13,15 +10,7 @@ public class TributeDTO {
     @JsonProperty("name")
     private String name;
 
-    public TributeDTO() {
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
+    public PaymentMethod() {
     }
 
     public String getCode() {

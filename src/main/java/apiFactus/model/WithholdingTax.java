@@ -19,7 +19,7 @@ public class WithholdingTax {
     private String code;
 
     @Column(name = "withholding_tax_rate")
-    private Double withholdingTaxRate; // Cambiado a Double
+    private String withholdingTaxRate; // Cambiado a Double
 
     public Long getId() {
         return id;
@@ -45,11 +45,11 @@ public class WithholdingTax {
         this.code = code;
     }
 
-    public Double getWithholdingTaxRate() {
+    public String getWithholdingTaxRate() {
         return withholdingTaxRate;
     }
 
-    public void setWithholdingTaxRate(Double withholdingTaxRate) {
+    public void setWithholdingTaxRate(String withholdingTaxRate) {
         this.withholdingTaxRate = withholdingTaxRate;
     }
 }

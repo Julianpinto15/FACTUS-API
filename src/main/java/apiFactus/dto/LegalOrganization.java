@@ -2,18 +2,18 @@ package apiFactus.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class MunicipalityDTO {
+public class LegalOrganization {
 
     @JsonProperty("id")
     private Integer id;
 
     @JsonProperty("code")
-    private String code;  // Agregado
+    private String code;
 
     @JsonProperty("name")
     private String name;
 
-    public MunicipalityDTO() {
+    public LegalOrganization() {
     }
 
     public Integer getId() {
@@ -24,14 +24,6 @@ public class MunicipalityDTO {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getCode() {
         return code;
     }
@@ -40,13 +32,11 @@ public class MunicipalityDTO {
         this.code = code;
     }
 
-    @Override
-    public String toString() {
-        return "MunicipalityDTO{" +
-                "id=" + id +
-                ", code='" + code + '\'' +
-                ", name='" + name + '\'' +
-                '}';
+    public String getName() {
+        return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
 }

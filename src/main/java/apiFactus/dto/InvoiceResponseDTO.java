@@ -1,20 +1,27 @@
 package apiFactus.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class InvoiceResponseDTO {
 
-    private Boolean success;
+    @JsonProperty("status")  // Cambia "success" por "status" y usa String
+    private String status;
+
+    @JsonProperty("message")
     private String message;
+
+    @JsonProperty("data")
     private InvoiceData data;
 
     public InvoiceResponseDTO() {
     }
 
-    public Boolean getSuccess() {
-        return success;
+    public String getStatus() {
+        return status;
     }
 
-    public void setSuccess(Boolean success) {
-        this.success = success;
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public String getMessage() {

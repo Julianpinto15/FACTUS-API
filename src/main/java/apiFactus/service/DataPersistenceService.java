@@ -84,17 +84,16 @@ public class DataPersistenceService implements CommandLineRunner {
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null && response.getBody().getData() != null) {
                 for (NumberingRangeDTO rangeDTO : response.getBody().getData()) {
                     try {
-                        // Buscar si la entidad ya existe
+                        // Buscar si la entity ya existe
                         NumberingRange existingRange = numberingRangeRepository.findById(rangeDTO.getId())
                                 .orElse(new NumberingRange());
 
-                        // Actualizar o crear la entidad
+                        // Actualizar o crear la entity
                         logger.debug("Processing NumberingRange#{}", rangeDTO.getId());
                         existingRange.setId(rangeDTO.getId());
                         existingRange.setPrefix(rangeDTO.getPrefix());
-                        existingRange.setStart_number(rangeDTO.getStart_number());
-                        existingRange.setEnd_number(rangeDTO.getEnd_number());
-                        existingRange.setStatus(rangeDTO.getStatus());
+                        existingRange.setStart_number(rangeDTO.getFrom());
+                        existingRange.setEnd_number(rangeDTO.getTo());
                         // No asignar version manualmente, dejar que Hibernate lo gestione
 
                         NumberingRange savedRange = numberingRangeRepository.save(existingRange);
@@ -160,15 +159,14 @@ public class DataPersistenceService implements CommandLineRunner {
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null && response.getBody().getData() != null) {
                 for (MunicipalityDTO municipalityDTO : response.getBody().getData()) {
                     try {
-                        // Buscar si la entidad ya existe
+                        // Buscar si la entity ya existe
                         Municipality existingMunicipality = municipalityRepository.findById(municipalityDTO.getId())
                                 .orElse(new Municipality());
 
-                        // Actualizar o crear la entidad
+                        // Actualizar o crear la entity
                         logger.debug("Processing Municipality#{}", municipalityDTO.getId());
                         existingMunicipality.setId(municipalityDTO.getId());
                         existingMunicipality.setName(municipalityDTO.getName());
-                        existingMunicipality.setDepartment(municipalityDTO.getDepartment());
                         // No asignar version manualmente, dejar que Hibernate lo gestione
 
                         Municipality savedMunicipality = municipalityRepository.save(existingMunicipality);
@@ -205,7 +203,7 @@ public class DataPersistenceService implements CommandLineRunner {
                         logger.debug("Processing UnitMeasure#{}", unitMeasureDTO.getId());
                         existingUnitMeasure.setId(unitMeasureDTO.getId());
                         existingUnitMeasure.setName(unitMeasureDTO.getName());
-                        existingUnitMeasure.setSymbol(unitMeasureDTO.getSymbol());
+                        existingUnitMeasure.setSymbol(unitMeasureDTO.getCode());
                         // No asignar version manualmente, dejar que Hibernate lo gestione
 
                         UnitMeasure savedUnitMeasure = unitMeasureRepository.save(existingUnitMeasure);

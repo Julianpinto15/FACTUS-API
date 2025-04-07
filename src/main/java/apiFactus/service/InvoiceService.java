@@ -13,7 +13,6 @@ import apiFactus.repository.InvoiceRepository;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -24,6 +23,7 @@ import org.springframework.web.client.RestTemplate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class InvoiceService {
@@ -32,22 +32,21 @@ public class InvoiceService {
 
     private final RestTemplate restTemplate;
     private final AuthService authService;
-
-    @Autowired
-    private InvoiceRepository invoiceRepository;
-
-    @Autowired
-    private CustomerRepository customerRepository;
+    private final InvoiceRepository invoiceRepository;
+    private final CustomerRepository customerRepository;
 
     @Value("${factus.api.url}")
     private String apiUrl;
 
-    @Autowired
     public InvoiceService(
             @Qualifier("apiRestTemplate") RestTemplate restTemplate,
-            AuthService authService) {
+            AuthService authService,
+            InvoiceRepository invoiceRepository,
+            CustomerRepository customerRepository) {
         this.restTemplate = restTemplate;
         this.authService = authService;
+        this.invoiceRepository = invoiceRepository;
+        this.customerRepository = customerRepository;
     }
 
     @Transactional
@@ -66,21 +65,15 @@ public class InvoiceService {
                     request,
                     InvoiceResponseDTO.class);
 
-            // Opción 1: Verificar que getSuccess() no devuelva null
-            if (response.getBody() != null && response.getBody().getSuccess() != null && response.getBody().getSuccess()) {
-                // Guardar la factura en la base de datos local
-                saveInvoiceToDatabase(invoiceRequest, response.getBody());
-            }
-
-// Opción 2: Usar un valor predeterminado con el operador de verificación nula de Java
-            if (response.getBody() != null && Boolean.TRUE.equals(response.getBody().getSuccess())) {
+            // Verificar si la factura fue creada exitosamente
+            if (response.getBody() != null && "Created".equals(response.getBody().getStatus())) {
                 // Guardar la factura en la base de datos local
                 saveInvoiceToDatabase(invoiceRequest, response.getBody());
             }
 
             return response.getBody();
-        } catch (HttpClientErrorException.Unauthorized e) {
-            // Si hay error de autorización, refrescamos el token y lo intentamos de nuevo
+        } catch (HttpClientErrorException.Unauthorized | HttpClientErrorException.Forbidden e) {
+            // Si hay error de autorización (401) o forbidden (403), refrescamos el token y lo intentamos de nuevo
             authService.refreshToken();
             request = new HttpEntity<>(invoiceRequest, headers);
 
@@ -90,7 +83,7 @@ public class InvoiceService {
                     request,
                     InvoiceResponseDTO.class);
 
-            if (response.getBody() != null && response.getBody().getSuccess()) {
+            if (response.getBody() != null && "Created".equals(response.getBody().getStatus())) {
                 // Guardar la factura en la base de datos local
                 saveInvoiceToDatabase(invoiceRequest, response.getBody());
             }
@@ -104,6 +97,12 @@ public class InvoiceService {
 
     @Transactional
     public void saveInvoiceToDatabase(InvoiceRequestDTO invoiceRequest, InvoiceResponseDTO invoiceResponse) {
+        // Validar parámetros de entrada
+        Objects.requireNonNull(invoiceRequest, "InvoiceRequestDTO cannot be null");
+        Objects.requireNonNull(invoiceResponse, "InvoiceResponseDTO cannot be null");
+        Objects.requireNonNull(invoiceResponse.getData(), "InvoiceResponseDTO data cannot be null");
+        Objects.requireNonNull(invoiceResponse.getData().getBill(), "InvoiceResponseDTO bill data cannot be null");
+
         // Buscar o crear el cliente
         Customer customer = customerRepository.findByIdentification(invoiceRequest.getCustomer().getIdentification());
         if (customer == null) {
@@ -111,7 +110,7 @@ public class InvoiceService {
             customer.setIdentification(invoiceRequest.getCustomer().getIdentification());
             customer.setDv(invoiceRequest.getCustomer().getDv());
             customer.setCompany(invoiceRequest.getCustomer().getCompany());
-            customer.setTradeName(invoiceRequest.getCustomer().getTrade_name()); // Ajustado a setTradeName
+            customer.setTradeName(invoiceRequest.getCustomer().getTrade_name());
             customer.setNames(invoiceRequest.getCustomer().getNames());
             customer.setAddress(invoiceRequest.getCustomer().getAddress());
             customer.setEmail(invoiceRequest.getCustomer().getEmail());
@@ -126,10 +125,10 @@ public class InvoiceService {
 
         // Crear la factura
         Invoice invoice = new Invoice();
-        invoice.setFactusInvoiceId(invoiceResponse.getData().getId());
-        invoice.setInvoiceNumber(invoiceResponse.getData().getInvoice_number());
-        invoice.setInvoiceUuid(invoiceResponse.getData().getInvoice_uuid());
-        invoice.setStatus(invoiceResponse.getData().getStatus());
+        invoice.setFactusInvoiceId(invoiceResponse.getData().getBill().getId());
+        invoice.setInvoiceNumber(invoiceResponse.getData().getBill().getNumber());
+        invoice.setInvoiceUuid(invoiceResponse.getData().getBill().getCufe()); // Usamos CUFE como UUID
+        invoice.setStatus(invoiceResponse.getData().getBill().getStatus());
         invoice.setReferenceCode(invoiceRequest.getReference_code());
         invoice.setObservation(invoiceRequest.getObservation());
         // Ajustar payment_form (extraer el código del objeto PaymentFormDTO)
@@ -175,7 +174,7 @@ public class InvoiceService {
                     WithholdingTax tax = new WithholdingTax();
                     tax.setInvoiceItem(item);
                     tax.setCode(taxDTO.getCode());
-                    tax.setWithholdingTaxRate(taxDTO.getWithholding_tax_rate());
+                    tax.setWithholdingTaxRate(taxDTO.getValue()); // Cambiado de getWithholding_tax_rate() a getValue()
                     withholdingTaxes.add(tax);
                 }
             }
