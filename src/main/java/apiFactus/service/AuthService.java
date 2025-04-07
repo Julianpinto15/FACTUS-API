@@ -2,7 +2,6 @@ package apiFactus.service;
 
 import apiFactus.dto.AuthRequestDTO;
 import apiFactus.dto.AuthResponseDTO;
-import apiFactus.utils.TokenUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -96,6 +95,8 @@ public class AuthService {
                 authResponse.setAccessToken(this.accessToken);
                 authResponse.setRefreshToken(this.refreshToken);
                 authResponse.setExpiresIn((int) expiresIn);
+                authResponse.setTokenType(jsonNode.get("token_type").asText()); // Configurar token_type
+
                 return authResponse;
             } else {
                 logger.error("Fallo en la autenticación con Factus API: Status={}, Body={}", response.getStatusCode(), response.getBody());
@@ -206,8 +207,13 @@ public class AuthService {
         map.add("grant_type", authRequestDTO.getGrant_type() != null ? authRequestDTO.getGrant_type() : "password");
         map.add("client_id", authRequestDTO.getClient_id() != null ? authRequestDTO.getClient_id() : clientId);
         map.add("client_secret", authRequestDTO.getClient_secret() != null ? authRequestDTO.getClient_secret() : clientSecret);
-        map.add("username", authRequestDTO.getUsername() != null ? authRequestDTO.getUsername() : username);
-        map.add("password", authRequestDTO.getPassword() != null ? authRequestDTO.getPassword() : password);
+
+        if ("password".equals(authRequestDTO.getGrant_type())) {
+            map.add("username", authRequestDTO.getUsername() != null ? authRequestDTO.getUsername() : username);
+            map.add("password", authRequestDTO.getPassword() != null ? authRequestDTO.getPassword() : password);
+        } else if ("refresh_token".equals(authRequestDTO.getGrant_type())) {
+            map.add("refresh_token", authRequestDTO.getRefresh_token());
+        }
 
         return new HttpEntity<>(map, headers);
     }

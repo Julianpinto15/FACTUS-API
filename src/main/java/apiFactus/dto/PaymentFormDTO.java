@@ -2,16 +2,20 @@ package apiFactus.dto;
 
 public class PaymentFormDTO {
 
-    private Integer code;
+    private String code;
 
     public PaymentFormDTO() {
     }
 
-    public Integer getCode() {
+    public PaymentFormDTO(String code) {
+        this.code = code;
+    }
+
+    public String getCode() {
         return code;
     }
 
-    public void setCode(Integer code) {
+    public void setCode(String code) {
         this.code = code;
     }
 }

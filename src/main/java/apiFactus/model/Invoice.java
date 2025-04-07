@@ -32,7 +32,7 @@ public class Invoice {
     private String observation;
 
     @Column(name = "payment_form")
-    private Integer paymentForm; // Cambiado a Integer para coincidir con PaymentFormDTO.code
+    private String paymentForm; // Cambiado a Integer para coincidir con PaymentFormDTO.code
 
     @Column(name = "payment_due_date")
     private String paymentDueDate;
@@ -121,11 +121,11 @@ public class Invoice {
         this.observation = observation;
     }
 
-    public Integer getPaymentForm() {
+    public String getPaymentForm() {
         return paymentForm;
     }
 
-    public void setPaymentForm(Integer paymentForm) {
+    public void setPaymentForm(String paymentForm) {
         this.paymentForm = paymentForm;
     }
 

@@ -66,7 +66,14 @@ public class InvoiceService {
                     request,
                     InvoiceResponseDTO.class);
 
-            if (response.getBody() != null && response.getBody().getSuccess()) {
+            // Opción 1: Verificar que getSuccess() no devuelva null
+            if (response.getBody() != null && response.getBody().getSuccess() != null && response.getBody().getSuccess()) {
+                // Guardar la factura en la base de datos local
+                saveInvoiceToDatabase(invoiceRequest, response.getBody());
+            }
+
+// Opción 2: Usar un valor predeterminado con el operador de verificación nula de Java
+            if (response.getBody() != null && Boolean.TRUE.equals(response.getBody().getSuccess())) {
                 // Guardar la factura en la base de datos local
                 saveInvoiceToDatabase(invoiceRequest, response.getBody());
             }
@@ -127,7 +134,7 @@ public class InvoiceService {
         invoice.setObservation(invoiceRequest.getObservation());
         // Ajustar payment_form (extraer el código del objeto PaymentFormDTO)
         if (invoiceRequest.getPayment_form() != null) {
-            invoice.setPaymentForm(invoiceRequest.getPayment_form().getCode());
+            invoice.setPaymentForm(invoiceRequest.getPayment_form());
         }
         invoice.setPaymentDueDate(invoiceRequest.getPayment_due_date());
         invoice.setPaymentMethodCode(invoiceRequest.getPayment_method_code());

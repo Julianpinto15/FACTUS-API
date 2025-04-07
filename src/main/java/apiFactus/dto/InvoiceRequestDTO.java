@@ -1,17 +1,36 @@
 package apiFactus.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.List;
 
 public class InvoiceRequestDTO {
 
+    @JsonProperty("numbering_range_id")
     private Integer numbering_range_id;
+
+    @JsonProperty("reference_code")
     private String reference_code;
+
+    @JsonProperty("observation")
     private String observation;
+
+    @JsonProperty("payment_method_code")
     private Integer payment_method_code;
+
+    @JsonProperty("payment_due_date")
     private String payment_due_date;
-    private PaymentFormDTO payment_form;
+
+    @JsonProperty("payment_form")
+    private String payment_form; // Cambiado a String
+
+    @JsonProperty("billing_period")
     private BillingPeriodDTO billing_period;
+
+    @JsonProperty("customer")
     private CustomerDTO customer;
+
+    @JsonProperty("items")
     private List<ItemDTO> items;
 
     public InvoiceRequestDTO() {
@@ -57,11 +76,11 @@ public class InvoiceRequestDTO {
         this.payment_due_date = payment_due_date;
     }
 
-    public PaymentFormDTO getPayment_form() {
+    public String getPayment_form() {
         return payment_form;
     }
 
-    public void setPayment_form(PaymentFormDTO payment_form) {
+    public void setPayment_form(String payment_form) {
         this.payment_form = payment_form;
     }
 
