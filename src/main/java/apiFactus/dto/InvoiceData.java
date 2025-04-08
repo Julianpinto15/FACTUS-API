@@ -2,6 +2,7 @@ package apiFactus.dto;
 
 import apiFactus.model.Customer;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hibernate.cache.spi.support.AbstractReadWriteAccess;
 
 import java.util.List;
@@ -18,7 +19,7 @@ public class InvoiceData {
     private NumberingRangeDTO numberingRange;
 
     @JsonProperty("billing_period")
-    private List<BillingPeriodDTO> billingPeriod;
+    private Object billingPeriod;
 
     @JsonProperty("bill")
     private Bill bill;
@@ -65,11 +66,11 @@ public class InvoiceData {
         this.numberingRange = numberingRange;
     }
 
-    public List<BillingPeriodDTO> getBillingPeriod() {
+    public Object getBillingPeriod() {
         return billingPeriod;
     }
 
-    public void setBillingPeriod(List<BillingPeriodDTO> billingPeriod) {
+    public void setBillingPeriod(Object billingPeriod) {
         this.billingPeriod = billingPeriod;
     }
 
@@ -120,4 +121,25 @@ public class InvoiceData {
     public void setDebitNotes(List<Object> debitNotes) {
         this.debitNotes = debitNotes;
     }
+
+
+    // Métodos auxiliares para manejar billing_period
+    public List<BillingPeriodDTO> getBillingPeriodAsList() {
+        if (billingPeriod instanceof List) {
+            return (List<BillingPeriodDTO>) billingPeriod;
+        }
+        return null;
+    }
+
+    public BillingPeriodDTO getBillingPeriodAsObject() {
+        if (billingPeriod instanceof BillingPeriodDTO) {
+            return (BillingPeriodDTO) billingPeriod;
+        } else if (billingPeriod instanceof java.util.Map) {
+            // Convertir manualmente un Map (objeto JSON) a BillingPeriodDTO
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.convertValue(billingPeriod, BillingPeriodDTO.class);
+        }
+        return null;
+    }
+
 }

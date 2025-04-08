@@ -55,7 +55,6 @@ public class InvoiceService {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("Accept", "application/json");
-        // El token será añadido automáticamente por el TokenInterceptor
 
         HttpEntity<InvoiceRequestDTO> request = new HttpEntity<>(invoiceRequest, headers);
 
@@ -66,30 +65,18 @@ public class InvoiceService {
                     request,
                     InvoiceResponseDTO.class);
 
-            // Verificar si la factura fue creada exitosamente
-            if (response.getBody() != null && "Created".equals(response.getBody().getStatus())) {
-                // Guardar la factura en la base de datos local
-                saveInvoiceToDatabase(invoiceRequest, response.getBody());
+            InvoiceResponseDTO responseBody = response.getBody();
+            if (responseBody != null && "Created".equals(responseBody.getStatus())) {
+                // Manejar billing_period según su tipo
+                if (responseBody.getBillingPeriod() != null) {
+                    logger.debug("billing_period es una lista: {}", responseBody.getBillingPeriod());
+                } else if (responseBody.getBillingPeriod() != null) {
+                    logger.debug("billing_period es un objeto: {}", responseBody.getBillingPeriod());
+                }
+                saveInvoiceToDatabase(invoiceRequest, responseBody);
             }
 
-            return response.getBody();
-        } catch (HttpClientErrorException.Unauthorized | HttpClientErrorException.Forbidden e) {
-            // Si hay error de autorización (401) o forbidden (403), refrescamos el token y lo intentamos de nuevo
-            authService.refreshToken();
-            request = new HttpEntity<>(invoiceRequest, headers);
-
-            logger.debug("Reintentando solicitud para crear factura a: {}", apiUrl + "/v1/bills/validate");
-            ResponseEntity<InvoiceResponseDTO> response = restTemplate.postForEntity(
-                    apiUrl + "/v1/bills/validate",
-                    request,
-                    InvoiceResponseDTO.class);
-
-            if (response.getBody() != null && "Created".equals(response.getBody().getStatus())) {
-                // Guardar la factura en la base de datos local
-                saveInvoiceToDatabase(invoiceRequest, response.getBody());
-            }
-
-            return response.getBody();
+            return responseBody;
         } catch (Exception e) {
             logger.error("Error al crear la factura: {}", e.getMessage(), e);
             throw new RuntimeException("Error al crear la factura: " + e.getMessage(), e);
