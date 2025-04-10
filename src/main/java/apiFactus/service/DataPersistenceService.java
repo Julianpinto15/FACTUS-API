@@ -203,7 +203,7 @@ public class DataPersistenceService implements CommandLineRunner {
                         logger.debug("Processing UnitMeasure#{}", unitMeasureDTO.getId());
                         existingUnitMeasure.setId(unitMeasureDTO.getId());
                         existingUnitMeasure.setName(unitMeasureDTO.getName());
-                        existingUnitMeasure.setSymbol(unitMeasureDTO.getCode());
+                        existingUnitMeasure.setCode(unitMeasureDTO.getCode());
                         // No asignar version manualmente, dejar que Hibernate lo gestione
 
                         UnitMeasure savedUnitMeasure = unitMeasureRepository.save(existingUnitMeasure);

@@ -1,10 +1,11 @@
 package apiFactus.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 
 @Entity
-public class UnitMeasure {
+public class StandardCode {
 
     @Id
 
@@ -12,18 +13,14 @@ public class UnitMeasure {
     private Integer id;
 
     @JsonProperty("code")
-    private String code;  // Agregado
+    private String code;
 
     @JsonProperty("name")
     private String name;
 
-    @ManyToOne
-    @JoinColumn(name = "invoice_item_id")
-    private InvoiceItem invoiceItem;
 
-    @Version
-    private Long version = 0L;
-
+    public StandardCode() {
+    }
 
     public Integer getId() {
         return id;
@@ -49,20 +46,4 @@ public class UnitMeasure {
         this.name = name;
     }
 
-    public InvoiceItem getInvoiceItem() {
-        return invoiceItem;
-    }
-
-    public void setInvoiceItem(InvoiceItem invoiceItem) {
-        this.invoiceItem = invoiceItem;
-    }
-
-    public Long getVersion() {
-        return version;
-    }
-
-    public void setVersion(Long version) {
-        this.version = version;
-    }
 }
-

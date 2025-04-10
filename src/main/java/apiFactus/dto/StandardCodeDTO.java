@@ -2,7 +2,7 @@ package apiFactus.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class StandardCode {
+public class StandardCodeDTO {
 
     @JsonProperty("id")
     private Integer id;
@@ -12,9 +12,6 @@ public class StandardCode {
 
     @JsonProperty("name")
     private String name;
-
-    public StandardCode() {
-    }
 
     public Integer getId() {
         return id;

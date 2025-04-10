@@ -1,5 +1,9 @@
 package apiFactus.dto;
 
+import apiFactus.model.UnitMeasure;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.Column;
+
 import java.util.List;
 
 public class ItemDTO {
@@ -8,13 +12,36 @@ public class ItemDTO {
     private String name;
     private Integer quantity;
     private Double discount_rate;
+    @Column(name = "discount")
+    private Double discount;
+
+    @Column(name = "gross_value")
+    private Double grossValue;
+
+    @Column(name = "taxable_amount")
+    private Double taxableAmount;
+
+    @Column(name = "tax_amount")
+    private Double taxAmount;
+
+    @JsonProperty("standard_code_id")
+    private Integer standardCodeId;
+
+    @JsonProperty("unit_measure_id")
+    private Integer unitMeasureId;
+
     private Double price;
-    private String tax_rate;
-    private Integer unit_measure_id;
-    private Integer standard_code_id;
+    private Double tax_rate;
+    private UnitMeasureDTO unit_measure;
+    private StandardCodeDTO standard_code;
+    private TributeDTO tribute;
     private Integer is_excluded;
     private Integer tribute_id;
+
+    @Column(name = "total")
+    private Double total;
     private List<WithholdingTaxDTO> withholding_taxes;
+
 
     public ItemDTO() {
     }
@@ -59,28 +86,44 @@ public class ItemDTO {
         this.price = price;
     }
 
-    public String getTax_rate() {
+    public Double getTax_rate() {
         return tax_rate;
     }
 
-    public void setTax_rate(String tax_rate) {
+    public void setTax_rate(Double tax_rate) {
         this.tax_rate = tax_rate;
     }
 
-    public Integer getUnit_measure_id() {
-        return unit_measure_id;
+    public UnitMeasureDTO getUnit_measure() {
+        return unit_measure;
     }
 
-    public void setUnit_measure_id(Integer unit_measure_id) {
-        this.unit_measure_id = unit_measure_id;
+    public void setUnit_measure(UnitMeasureDTO unit_measure) {
+        this.unit_measure = unit_measure;
     }
 
-    public Integer getStandard_code_id() {
-        return standard_code_id;
+    public StandardCodeDTO getStandard_code() {
+        return standard_code;
     }
 
-    public void setStandard_code_id(Integer standard_code_id) {
-        this.standard_code_id = standard_code_id;
+    public void setStandard_code(StandardCodeDTO standard_code) {
+        this.standard_code = standard_code;
+    }
+
+    public TributeDTO getTribute() {
+        return tribute;
+    }
+
+    public void setTribute(TributeDTO tribute) {
+        this.tribute = tribute;
+    }
+
+    public Double getDiscount() {
+        return discount;
+    }
+
+    public void setDiscount(Double discount) {
+        this.discount = discount;
     }
 
     public Integer getIs_excluded() {
@@ -105,5 +148,53 @@ public class ItemDTO {
 
     public void setWithholding_taxes(List<WithholdingTaxDTO> withholding_taxes) {
         this.withholding_taxes = withholding_taxes;
+    }
+
+    public Double getGrossValue() {
+        return grossValue;
+    }
+
+    public void setGrossValue(Double grossValue) {
+        this.grossValue = grossValue;
+    }
+
+    public Double getTaxableAmount() {
+        return taxableAmount;
+    }
+
+    public void setTaxableAmount(Double taxableAmount) {
+        this.taxableAmount = taxableAmount;
+    }
+
+    public Double getTaxAmount() {
+        return taxAmount;
+    }
+
+    public void setTaxAmount(Double taxAmount) {
+        this.taxAmount = taxAmount;
+    }
+
+    public Double getTotal() {
+        return total;
+    }
+
+    public void setTotal(Double total) {
+        this.total = total;
+    }
+
+    public Integer getUnitMeasureId() {
+        return unitMeasureId;
+    }
+
+    public void setUnitMeasureId(Integer unitMeasureId) {
+        this.unitMeasureId = unitMeasureId;
+    }
+
+    public Integer getStandardCodeId() {
+        return standardCodeId;
+    }
+
+    public void setStandardCodeId(Integer standardCodeId) {
+        this.standardCodeId = standardCodeId;
     }
 }

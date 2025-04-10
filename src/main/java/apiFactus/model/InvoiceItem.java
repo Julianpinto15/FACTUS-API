@@ -1,8 +1,6 @@
 package apiFactus.model;
 
 import jakarta.persistence.*;
-
-
 import java.util.List;
 
 @Entity
@@ -24,28 +22,47 @@ public class InvoiceItem {
     private Integer quantity;
 
     @Column(name = "discount_rate")
-    private Double discountRate; // Cambiado a Double
+    private Double discountRate;
 
-    private Double price; // Cambiado a Double
+    @Column(name = "discount")
+    private Double discount;
+
+    @Column(name = "gross_value")
+    private Double grossValue;
 
     @Column(name = "tax_rate")
-    private String taxRate; // Cambiado a String para coincidir con Factus
+    private Double taxRate; // Cambiado a Double
 
-    @Column(name = "unit_measure_id")
-    private Integer unitMeasureId;
+    @Column(name = "taxable_amount")
+    private Double taxableAmount;
 
-    @Column(name = "standard_code_id")
-    private Integer standardCodeId;
+    @Column(name = "tax_amount")
+    private Double taxAmount;
+
+    private Double price;
+
+    @Column(name = "total")
+    private Double total;
+
+    @ManyToOne
+    @JoinColumn(name = "unit_measure_id")
+    private UnitMeasure unitMeasure;
+
+    @ManyToOne
+    @JoinColumn(name = "standard_code_id")
+    private StandardCode standardCode;
 
     @Column(name = "is_excluded")
     private Integer isExcluded;
 
-    @Column(name = "tribute_id")
-    private Integer tributeId;
+    @ManyToOne
+    @JoinColumn(name = "tribute_id")
+    private Tribute tribute;
 
     @OneToMany(mappedBy = "invoiceItem", cascade = CascadeType.ALL)
     private List<WithholdingTax> withholdingTaxes;
 
+    // Getters y setters
     public Long getId() {
         return id;
     }
@@ -94,6 +111,46 @@ public class InvoiceItem {
         this.discountRate = discountRate;
     }
 
+    public Double getDiscount() {
+        return discount;
+    }
+
+    public void setDiscount(Double discount) {
+        this.discount = discount;
+    }
+
+    public Double getGrossValue() {
+        return grossValue;
+    }
+
+    public void setGrossValue(Double grossValue) {
+        this.grossValue = grossValue;
+    }
+
+    public Double getTaxRate() {
+        return taxRate;
+    }
+
+    public void setTaxRate(Double taxRate) {
+        this.taxRate = taxRate;
+    }
+
+    public Double getTaxableAmount() {
+        return taxableAmount;
+    }
+
+    public void setTaxableAmount(Double taxableAmount) {
+        this.taxableAmount = taxableAmount;
+    }
+
+    public Double getTaxAmount() {
+        return taxAmount;
+    }
+
+    public void setTaxAmount(Double taxAmount) {
+        this.taxAmount = taxAmount;
+    }
+
     public Double getPrice() {
         return price;
     }
@@ -102,28 +159,28 @@ public class InvoiceItem {
         this.price = price;
     }
 
-    public String getTaxRate() {
-        return taxRate;
+    public Double getTotal() {
+        return total;
     }
 
-    public void setTaxRate(String taxRate) {
-        this.taxRate = taxRate;
+    public void setTotal(Double total) {
+        this.total = total;
     }
 
-    public Integer getUnitMeasureId() {
-        return unitMeasureId;
+    public UnitMeasure getUnitMeasure() {
+        return unitMeasure;
     }
 
-    public void setUnitMeasureId(Integer unitMeasureId) {
-        this.unitMeasureId = unitMeasureId;
+    public void setUnitMeasure(UnitMeasure unitMeasure) {
+        this.unitMeasure = unitMeasure;
     }
 
-    public Integer getStandardCodeId() {
-        return standardCodeId;
+    public StandardCode getStandardCode() {
+        return standardCode;
     }
 
-    public void setStandardCodeId(Integer standardCodeId) {
-        this.standardCodeId = standardCodeId;
+    public void setStandardCode(StandardCode standardCode) {
+        this.standardCode = standardCode;
     }
 
     public Integer getIsExcluded() {
@@ -134,12 +191,12 @@ public class InvoiceItem {
         this.isExcluded = isExcluded;
     }
 
-    public Integer getTributeId() {
-        return tributeId;
+    public Tribute getTribute() {
+        return tribute;
     }
 
-    public void setTributeId(Integer tributeId) {
-        this.tributeId = tributeId;
+    public void setTribute(Tribute tribute) {
+        this.tribute = tribute;
     }
 
     public List<WithholdingTax> getWithholdingTaxes() {

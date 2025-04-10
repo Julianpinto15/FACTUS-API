@@ -1,11 +1,13 @@
 package apiFactus.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.List;
+
 @Entity
 @Table(name = "withholding_taxes")
-@Data
 public class WithholdingTax {
 
     @Id
@@ -16,10 +18,16 @@ public class WithholdingTax {
     @JoinColumn(name = "invoice_item_id")
     private InvoiceItem invoiceItem;
 
+    @JsonProperty("name")
+    private String name;
+
     private String code;
 
     @Column(name = "withholding_tax_rate")
-    private String withholdingTaxRate; // Cambiado a Double
+    private String withholdingTaxRate;
+
+    @OneToMany(mappedBy = "withholdingTax", cascade = CascadeType.ALL)
+    private List<WithholdingTaxRate> rates;
 
     public Long getId() {
         return id;
@@ -49,7 +57,22 @@ public class WithholdingTax {
         return withholdingTaxRate;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
     public void setWithholdingTaxRate(String withholdingTaxRate) {
         this.withholdingTaxRate = withholdingTaxRate;
+    }
+
+    public List<WithholdingTaxRate> getRates() {
+        return rates;
+    }
+
+    public void setRates(List<WithholdingTaxRate> rates) {
+        this.rates = rates;
     }
 }

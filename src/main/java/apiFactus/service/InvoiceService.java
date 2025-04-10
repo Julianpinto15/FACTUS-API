@@ -1,16 +1,10 @@
 package apiFactus.service;
 
-import apiFactus.dto.InvoiceRequestDTO;
-import apiFactus.dto.InvoiceResponseDTO;
-import apiFactus.dto.ItemDTO;
-import apiFactus.dto.WithholdingTaxDTO;
+import apiFactus.dto.*;
+import apiFactus.model.*;
 import apiFactus.model.Customer;
-import apiFactus.model.Invoice;
-import apiFactus.model.InvoiceItem;
-import apiFactus.model.WithholdingTax;
 import apiFactus.repository.CustomerRepository;
 import apiFactus.repository.InvoiceRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -149,12 +143,39 @@ public class InvoiceService {
             item.setName(itemDTO.getName());
             item.setQuantity(itemDTO.getQuantity());
             item.setDiscountRate(itemDTO.getDiscount_rate());
-            item.setPrice(itemDTO.getPrice());
+            item.setDiscount(itemDTO.getDiscount());
+            item.setGrossValue(itemDTO.getGrossValue());
             item.setTaxRate(itemDTO.getTax_rate());
-            item.setUnitMeasureId(itemDTO.getUnit_measure_id());
-            item.setStandardCodeId(itemDTO.getStandard_code_id());
+            item.setTaxableAmount(itemDTO.getTaxableAmount());
+            item.setTaxAmount(itemDTO.getTaxAmount());
+            item.setPrice(itemDTO.getPrice());
+            item.setTotal(itemDTO.getTotal());
             item.setIsExcluded(itemDTO.getIs_excluded());
-            item.setTributeId(itemDTO.getTribute_id());
+
+            // Configurar relaciones
+            if (itemDTO.getUnit_measure() != null) {
+                UnitMeasure unitMeasure = new UnitMeasure();
+                unitMeasure.setId(itemDTO.getUnit_measure().getId());
+                unitMeasure.setCode(itemDTO.getUnit_measure().getCode());
+                unitMeasure.setName(itemDTO.getUnit_measure().getName());
+                item.setUnitMeasure(unitMeasure);
+            }
+
+            if (itemDTO.getStandard_code() != null) {
+                StandardCode standardCode = new StandardCode();
+                standardCode.setId(itemDTO.getStandard_code().getId());
+                standardCode.setCode(itemDTO.getStandard_code().getCode());
+                standardCode.setName(itemDTO.getStandard_code().getName());
+                item.setStandardCode(standardCode);
+            }
+
+            if (itemDTO.getTribute() != null) {
+                Tribute tribute = new Tribute();
+                tribute.setId(itemDTO.getTribute().getId());
+                tribute.setCode(itemDTO.getTribute().getCode());
+                tribute.setName(itemDTO.getTribute().getName());
+                item.setTribute(tribute);
+            }
 
             // Guardar las retenciones
             List<WithholdingTax> withholdingTaxes = new ArrayList<>();
@@ -163,7 +184,22 @@ public class InvoiceService {
                     WithholdingTax tax = new WithholdingTax();
                     tax.setInvoiceItem(item);
                     tax.setCode(taxDTO.getCode());
-                    tax.setWithholdingTaxRate(taxDTO.getValue()); // Cambiado de getWithholding_tax_rate() a getValue()
+                    tax.setName(taxDTO.getName());
+                    tax.setWithholdingTaxRate(taxDTO.getValue());
+
+                    // Guardar las tasas de retención
+                    List<WithholdingTaxRate> rates = new ArrayList<>();
+                    if (taxDTO.getRates() != null) {
+                        for (RateDTO rateDTO : taxDTO.getRates()) {
+                            WithholdingTaxRate rate = new WithholdingTaxRate();
+                            rate.setWithholdingTax(tax);
+                            rate.setCode(rateDTO.getCode());
+                            rate.setName(rateDTO.getName());
+                            rate.setRate(rateDTO.getRate());
+                            rates.add(rate);
+                        }
+                    }
+                    tax.setRates(rates);
                     withholdingTaxes.add(tax);
                 }
             }
@@ -171,9 +207,9 @@ public class InvoiceService {
             items.add(item);
         }
         invoice.setItems(items);
-
         invoiceRepository.save(invoice);
     }
+
 
     public InvoiceResponseDTO validateInvoice(Integer invoiceId) {
         HttpHeaders headers = new HttpHeaders();

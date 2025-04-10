@@ -3,6 +3,8 @@ package apiFactus.dto;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.List;
+
 public class WithholdingTaxDTO {
 
     @JsonAlias({"tribute_code"})
@@ -14,7 +16,9 @@ public class WithholdingTaxDTO {
 
     @JsonAlias({"value"})
     @JsonProperty("withholding_tax_rate")
-    private String value; // Cambiado de withholding_tax_rate a value
+    private String value;
+
+    private List<RateDTO> rates;
 
     public WithholdingTaxDTO() {
     }
@@ -53,5 +57,13 @@ public class WithholdingTaxDTO {
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Invalid value format: " + value, e);
         }
+    }
+
+    public List<RateDTO> getRates() {
+        return rates;
+    }
+
+    public void setRates(List<RateDTO> rates) {
+        this.rates = rates;
     }
 }
