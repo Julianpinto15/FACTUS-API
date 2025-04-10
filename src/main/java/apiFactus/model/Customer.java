@@ -25,6 +25,8 @@ public class Customer {
     @Column(name = "trade_name")
     private String TradeName;
 
+    private String graphic_representation_name;
+
     @Column(name = "names")
     private String names;
 
@@ -37,14 +39,17 @@ public class Customer {
     @Column(name = "phone")
     private String phone;
 
-    @Column(name = "legal_organization_id")
-    private Integer LegalOrganizationId;
+    @ManyToOne
+    @JoinColumn(name = "legal_organization_id")
+    private LegalOrganization legal_organization;
 
-    @Column(name = "tribute_id")
-    private Integer TributeId;
+    @ManyToOne
+    @JoinColumn(name = "tribute_id")
+    private Tribute tribute;
 
-    @Column(name = "municipality_id")
-    private Integer MunicipalityId;
+    @ManyToOne
+    @JoinColumn(name = "municipality_id")
+    private Municipality municipality;
 
     public Long getId() {
         return id;
@@ -94,6 +99,14 @@ public class Customer {
         TradeName = tradeName;
     }
 
+    public String getGraphic_representation_name() {
+        return graphic_representation_name;
+    }
+
+    public void setGraphic_representation_name(String graphic_representation_name) {
+        this.graphic_representation_name = graphic_representation_name;
+    }
+
     public String getNames() {
         return names;
     }
@@ -126,27 +139,27 @@ public class Customer {
         this.phone = phone;
     }
 
-    public Integer getLegalOrganizationId() {
-        return LegalOrganizationId;
+    public LegalOrganization getLegal_organization() {
+        return legal_organization;
     }
 
-    public void setLegalOrganizationId(Integer legalOrganizationId) {
-        LegalOrganizationId = legalOrganizationId;
+    public void setLegal_organization(LegalOrganization legal_organization) {
+        this.legal_organization = legal_organization;
     }
 
-    public Integer getTributeId() {
-        return TributeId;
+    public Tribute getTribute() {
+        return tribute;
     }
 
-    public void setTributeId(Integer tributeId) {
-        TributeId = tributeId;
+    public void setTribute(Tribute tribute) {
+        this.tribute = tribute;
     }
 
-    public Integer getMunicipalityId() {
-        return MunicipalityId;
+    public Municipality getMunicipality() {
+        return municipality;
     }
 
-    public void setMunicipalityId(Integer municipalityId) {
-        MunicipalityId = municipalityId;
+    public void setMunicipality(Municipality municipality) {
+        this.municipality = municipality;
     }
 }

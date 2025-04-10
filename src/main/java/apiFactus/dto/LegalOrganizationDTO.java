@@ -2,7 +2,7 @@ package apiFactus.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class LegalOrganization {
+public class LegalOrganizationDTO {
 
     @JsonProperty("id")
     private Integer id;
@@ -13,7 +13,7 @@ public class LegalOrganization {
     @JsonProperty("name")
     private String name;
 
-    public LegalOrganization() {
+    public LegalOrganizationDTO() {
     }
 
     public Integer getId() {

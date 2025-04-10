@@ -3,8 +3,7 @@ package apiFactus.service;
 import apiFactus.dto.*;
 import apiFactus.model.*;
 import apiFactus.model.Customer;
-import apiFactus.repository.CustomerRepository;
-import apiFactus.repository.InvoiceRepository;
+import apiFactus.repository.*;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +28,9 @@ public class InvoiceService {
     private final AuthService authService;
     private final InvoiceRepository invoiceRepository;
     private final CustomerRepository customerRepository;
+    private final MunicipalityRepository MunicipalityRepository;
+    private final TributeRepository tributeRepository;
+    private final LegalOrganizationRepository legalOrganizationRepository;
 
     @Value("${factus.api.url}")
     private String apiUrl;
@@ -37,11 +39,17 @@ public class InvoiceService {
             @Qualifier("apiRestTemplate") RestTemplate restTemplate,
             AuthService authService,
             InvoiceRepository invoiceRepository,
-            CustomerRepository customerRepository) {
+            CustomerRepository customerRepository,
+            MunicipalityRepository municipalityRepository,
+            TributeRepository tributeRepository,
+            LegalOrganizationRepository legalOrganizationRepository) {
         this.restTemplate = restTemplate;
         this.authService = authService;
         this.invoiceRepository = invoiceRepository;
         this.customerRepository = customerRepository;
+        this.MunicipalityRepository = municipalityRepository;
+        this.tributeRepository = tributeRepository;
+        this.legalOrganizationRepository = legalOrganizationRepository;
     }
 
     @Transactional
@@ -90,31 +98,66 @@ public class InvoiceService {
         Customer customer = customerRepository.findByIdentification(invoiceRequest.getCustomer().getIdentification());
         if (customer == null) {
             customer = new Customer();
+            customer.setIdentificationDocumentId(invoiceRequest.getCustomer().getIdentification_document_id());
             customer.setIdentification(invoiceRequest.getCustomer().getIdentification());
             customer.setDv(invoiceRequest.getCustomer().getDv());
+            customer.setGraphic_representation_name(invoiceRequest.getCustomer().getGraphic_representation_name());
             customer.setCompany(invoiceRequest.getCustomer().getCompany());
             customer.setTradeName(invoiceRequest.getCustomer().getTrade_name());
             customer.setNames(invoiceRequest.getCustomer().getNames());
             customer.setAddress(invoiceRequest.getCustomer().getAddress());
             customer.setEmail(invoiceRequest.getCustomer().getEmail());
             customer.setPhone(invoiceRequest.getCustomer().getPhone());
-            customer.setLegalOrganizationId(invoiceRequest.getCustomer().getLegal_organization_id());
-            customer.setTributeId(invoiceRequest.getCustomer().getTribute_id());
-            customer.setIdentificationDocumentId(invoiceRequest.getCustomer().getIdentification_document_id());
-            customer.setMunicipalityId(invoiceRequest.getCustomer().getMunicipality_id());
+
+            // Configurar relaciones
+            if (invoiceRequest.getCustomer().getLegal_organization() != null) {
+                LegalOrganization legalOrganization = legalOrganizationRepository.findById(invoiceRequest.getCustomer().getLegal_organization().getId())
+                        .orElseGet(() -> {
+                            LegalOrganization newLegalOrganization = new LegalOrganization();
+                            newLegalOrganization.setId(invoiceRequest.getCustomer().getLegal_organization().getId());
+                            newLegalOrganization.setCode(invoiceRequest.getCustomer().getLegal_organization().getCode());
+                            newLegalOrganization.setName(invoiceRequest.getCustomer().getLegal_organization().getName());
+                            return legalOrganizationRepository.save(newLegalOrganization);
+                        });
+                customer.setLegal_organization(legalOrganization);
+            }
+
+            if (invoiceRequest.getCustomer().getTribute() != null) {
+                Tribute tribute = tributeRepository.findById(invoiceRequest.getCustomer().getTribute().getId())
+                        .orElseGet(() -> {
+                            Tribute newTribute = new Tribute();
+                            newTribute.setId(invoiceRequest.getCustomer().getTribute().getId());
+                            newTribute.setCode(invoiceRequest.getCustomer().getTribute().getCode());
+                            newTribute.setName(invoiceRequest.getCustomer().getTribute().getName());
+                            return tributeRepository.save(newTribute);
+                        });
+                customer.setTribute(tribute);
+            }
+
+            if (invoiceRequest.getCustomer().getMunicipality() != null) {
+                Municipality municipality = MunicipalityRepository.findById(invoiceRequest.getCustomer().getMunicipality().getId())
+                        .orElseGet(() -> {
+                            Municipality newMunicipality = new Municipality();
+                            newMunicipality.setId(invoiceRequest.getCustomer().getMunicipality().getId());
+                            newMunicipality.setCode(invoiceRequest.getCustomer().getMunicipality().getCode());
+                            newMunicipality.setName(invoiceRequest.getCustomer().getMunicipality().getName());
+                            // Nota: El campo 'department' no está en el DTO, así que lo dejamos como null o podrías agregar un valor por defecto
+                            return MunicipalityRepository.save(newMunicipality);
+                        });
+                customer.setMunicipality(municipality);
+            }
 
             customer = customerRepository.save(customer);
         }
 
         // Crear la factura
-        Invoice invoice = new Invoice();
+        Invoice invoice = new Invoice(); // Inicializamos invoice aquí
         invoice.setFactusInvoiceId(invoiceResponse.getData().getBill().getId());
         invoice.setInvoiceNumber(invoiceResponse.getData().getBill().getNumber());
-        invoice.setInvoiceUuid(invoiceResponse.getData().getBill().getCufe()); // Usamos CUFE como UUID
+        invoice.setInvoiceUuid(invoiceResponse.getData().getBill().getCufe());
         invoice.setStatus(invoiceResponse.getData().getBill().getStatus());
         invoice.setReferenceCode(invoiceRequest.getReference_code());
         invoice.setObservation(invoiceRequest.getObservation());
-        // Ajustar payment_form (extraer el código del objeto PaymentFormDTO)
         if (invoiceRequest.getPayment_form() != null) {
             invoice.setPaymentForm(invoiceRequest.getPayment_form());
         }
@@ -124,15 +167,6 @@ public class InvoiceService {
         invoice.setUpdatedAt(LocalDateTime.now());
         invoice.setCustomer(customer);
 
-        // Datos del periodo de facturación
-        if (invoiceRequest.getBilling_period() != null) {
-            invoice.setBillingStartDate(invoiceRequest.getBilling_period().getStart_date());
-            invoice.setBillingStartTime(invoiceRequest.getBilling_period().getStart_time());
-            invoice.setBillingEndDate(invoiceRequest.getBilling_period().getEnd_date());
-            invoice.setBillingEndTime(invoiceRequest.getBilling_period().getEnd_time());
-        }
-
-        invoice = invoiceRepository.save(invoice);
 
         // Guardar los ítems de la factura
         List<InvoiceItem> items = new ArrayList<>();

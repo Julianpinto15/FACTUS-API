@@ -32,7 +32,7 @@ public class Customer {
     private String phone;
 
     @JsonProperty("legal_organization")
-    private LegalOrganization legalOrganization;
+    private LegalOrganizationDTO legal_organization;
 
     @JsonProperty("tribute")
     private TributeDTO tribute;
@@ -115,12 +115,12 @@ public class Customer {
         this.phone = phone;
     }
 
-    public LegalOrganization getLegalOrganization() {
-        return legalOrganization;
+    public LegalOrganizationDTO getLegal_organization() {
+        return legal_organization;
     }
 
-    public void setLegalOrganization(LegalOrganization legalOrganization) {
-        this.legalOrganization = legalOrganization;
+    public void setLegal_organization(LegalOrganizationDTO legal_organization) {
+        this.legal_organization = legal_organization;
     }
 
     public TributeDTO getTribute() {

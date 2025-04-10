@@ -3,20 +3,19 @@ package apiFactus.model;
 import jakarta.persistence.*;
 
 @Entity
-public class Municipality {
+@Table(name = "legal_organizations")
+public class LegalOrganization {
 
     @Id
     private Integer id;
 
     private String code;
-
     private String name;
-    private String department;
-
 
     @Version
     private Long version = 0L;
 
+    // Getters y setters
     public Integer getId() {
         return id;
     }
@@ -41,14 +40,6 @@ public class Municipality {
         this.name = name;
     }
 
-    public String getDepartment() {
-        return department;
-    }
-
-    public void setDepartment(String department) {
-        this.department = department;
-    }
-
     public Long getVersion() {
         return version;
     }
@@ -56,5 +47,4 @@ public class Municipality {
     public void setVersion(Long version) {
         this.version = version;
     }
-
 }

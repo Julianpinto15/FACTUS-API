@@ -1,36 +1,56 @@
 package apiFactus.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class CustomerDTO {
 
     private Integer identification_document_id;
     private String identification;
     private Integer dv;
+    private String graphic_representation_name;
     private String company;
     private String trade_name;
     private String names;
     private String address;
     private String email;
     private String phone;
-    private Integer legal_organization_id;
-    private Integer tribute_id;
-    private Integer municipality_id;
+
+    @JsonProperty("legal_organization_id")
+    private String legalOrganizationId;
+
+    @JsonProperty("tribute_id")
+    private String tributeId;
+
+    @JsonProperty("municipality_id")
+    private String municipalityId;
+
+    @JsonIgnore
+    private LegalOrganizationDTO legal_organization;
+
+    private TributeDTO tribute;
+    private MunicipalityDTO municipality;
 
     public CustomerDTO() {
     }
 
-    public CustomerDTO(Integer identification_document_id, String identification, Integer dv, String company, String trade_name, String names, String address, String email, String phone, Integer legal_organization_id, Integer tribute_id, Integer municipality_id) {
+    public CustomerDTO(Integer identification_document_id, String identification, Integer dv, String graphic_representation_name, String company, String trade_name, String names, String address, String email, String phone, String legalOrganizationId, String tributeId, String municipalityId, LegalOrganizationDTO legal_organization, TributeDTO tribute, MunicipalityDTO municipality) {
         this.identification_document_id = identification_document_id;
         this.identification = identification;
         this.dv = dv;
+        this.graphic_representation_name = graphic_representation_name;
         this.company = company;
         this.trade_name = trade_name;
         this.names = names;
         this.address = address;
         this.email = email;
         this.phone = phone;
-        this.legal_organization_id = legal_organization_id;
-        this.tribute_id = tribute_id;
-        this.municipality_id = municipality_id;
+        this.legalOrganizationId = legalOrganizationId;
+        this.tributeId = tributeId;
+        this.municipalityId = municipalityId;
+        this.legal_organization = legal_organization;
+        this.tribute = tribute;
+        this.municipality = municipality;
     }
 
     public Integer getIdentification_document_id() {
@@ -55,6 +75,14 @@ public class CustomerDTO {
 
     public void setDv(Integer dv) {
         this.dv = dv;
+    }
+
+    public String getGraphic_representation_name() {
+        return graphic_representation_name;
+    }
+
+    public void setGraphic_representation_name(String graphic_representation_name) {
+        this.graphic_representation_name = graphic_representation_name;
     }
 
     public String getCompany() {
@@ -105,27 +133,66 @@ public class CustomerDTO {
         this.phone = phone;
     }
 
-    public Integer getLegal_organization_id() {
-        return legal_organization_id;
+    public String getLegalOrganizationId() {
+        return legalOrganizationId;
     }
 
-    public void setLegal_organization_id(Integer legal_organization_id) {
-        this.legal_organization_id = legal_organization_id;
+    public void setLegalOrganizationId(String legalOrganizationId) {
+        this.legalOrganizationId = legalOrganizationId;
     }
 
-    public Integer getTribute_id() {
-        return tribute_id;
+    // Getter que convierte el ID en objeto
+    public LegalOrganizationDTO getLegal_organization() {
+        if (legal_organization == null && legalOrganizationId != null) {
+            legal_organization = new LegalOrganizationDTO();
+            legal_organization.setId(Integer.parseInt(legalOrganizationId));
+        }
+        return legal_organization;
     }
 
-    public void setTribute_id(Integer tribute_id) {
-        this.tribute_id = tribute_id;
+    public void setLegal_organization(LegalOrganizationDTO legal_organization) {
+        this.legal_organization = legal_organization;
     }
 
-    public Integer getMunicipality_id() {
-        return municipality_id;
+    public TributeDTO getTribute() {
+        if (tribute == null && tributeId != null) {
+            tribute = new TributeDTO();
+            tribute.setId(Integer.parseInt(tributeId));
+        }
+        return tribute;
     }
 
-    public void setMunicipality_id(Integer municipality_id) {
-        this.municipality_id = municipality_id;
+    public void setTribute(TributeDTO tribute) {
+        this.tribute = tribute;
     }
+
+    public MunicipalityDTO getMunicipality() {
+        if (municipality == null && municipalityId != null) {
+            municipality = new MunicipalityDTO();
+            municipality.setId(Integer.parseInt(municipalityId));
+        }
+        return municipality;
+    }
+
+    public void setMunicipality(MunicipalityDTO municipality) {
+        this.municipality = municipality;
+    }
+
+    public String getTributeId() {
+        return tributeId;
+    }
+
+    public void setTributeId(String tributeId) {
+        this.tributeId = tributeId;
+    }
+
+    public String getMunicipalityId() {
+        return municipalityId;
+    }
+
+    public void setMunicipalityId(String municipalityId) {
+        this.municipalityId = municipalityId;
+    }
+
+
 }
