@@ -5,6 +5,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -13,12 +16,20 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .cors(cors -> cors.configurationSource(request -> {
+                    CorsConfiguration config = new CorsConfiguration();
+                    config.setAllowedOrigins(Arrays.asList("http://localhost:4200"));
+                    config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                    config.setAllowedHeaders(Arrays.asList("*"));
+                    config.setAllowCredentials(true);
+                    return config;
+                }))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/oauth/token", "/oauth/refresh").permitAll()
-                        .requestMatchers("/v1/bills/**").permitAll() // Permitir acceso público a /v1/bills/validate
-                        .anyRequest().authenticated() // Proteger otros endpoints
+                        .requestMatchers("/oauth/token", "/oauth/refresh", "/register", "/auth/google").permitAll()
+                        .requestMatchers("/v1/bills/**").permitAll()
+                        .anyRequest().authenticated()
                 )
-                .csrf(csrf -> csrf.disable()); // Deshabilitar CSRF
+                .csrf(csrf -> csrf.disable());
 
         return http.build();
     }

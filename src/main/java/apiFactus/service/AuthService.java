@@ -2,10 +2,12 @@ package apiFactus.service;
 
 import apiFactus.dto.AuthRequestDTO;
 import apiFactus.dto.AuthResponseDTO;
+import apiFactus.model.User;
+import apiFactus.repository.UserRepository;
+import apiFactus.config.FactusConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -19,43 +21,35 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+
 @Service
 public class AuthService {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
 
-    private final RestTemplate authRestTemplate;
+    private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
+    private final UserRepository userRepository;
+    private final FactusConfig factusConfig;
 
-    private final String apiUrl;
-    private final String clientId;
-    private final String clientSecret;
-    private final String username;
-    private final String password;
-
-    // Campos para manejar el token
     private String accessToken;
     private String refreshToken;
     private long tokenExpirationTime;
 
     public AuthService(
-            @Qualifier("authRestTemplate") RestTemplate authRestTemplate,
+            @Qualifier("authRestTemplate") RestTemplate restTemplate,
             ObjectMapper objectMapper,
-            @Value("${factus.api.url}") String apiUrl,
-            @Value("${factus.api.client-id}") String clientId,
-            @Value("${factus.api.client-secret}") String clientSecret,
-            @Value("${factus.api.email}") String username,
-            @Value("${factus.api.password}") String password) {
-        this.authRestTemplate = authRestTemplate;
+            UserRepository userRepository,
+            FactusConfig factusConfig) {
+        this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
-        this.apiUrl = apiUrl;
-        this.clientId = clientId;
-        this.clientSecret = clientSecret;
-        this.username = username;
-        this.password = password;
+        this.userRepository = userRepository;
+        this.factusConfig = factusConfig;
     }
 
-    // Método para obtener el token
     public String getAccessToken() {
         if (accessToken == null || System.currentTimeMillis() >= tokenExpirationTime) {
             refreshTokenWithRefreshToken();
@@ -63,22 +57,21 @@ public class AuthService {
         return accessToken;
     }
 
-    // Método para compatibilidad con la interfaz original
     public void authenticate() {
-        refreshTokenDirectly(); // Obtener un nuevo token directamente con las credenciales
+        refreshTokenDirectly();
     }
 
-    // Método original para autenticar con un DTO
     public AuthResponseDTO authenticate(AuthRequestDTO authRequestDTO) {
-        HttpEntity<MultiValueMap<String, String>> request = buildAuthRequest(authRequestDTO);
+        // Usar siempre las credenciales por defecto de FactusConfig
+        HttpEntity<MultiValueMap<String, String>> request = buildAuthRequestWithDefaultCredentials();
 
-        logger.debug("Enviando solicitud de autenticación a: {}", apiUrl + "/oauth/token");
+        logger.debug("Enviando solicitud de autenticación a: {}", factusConfig.getUrl() + "/oauth/token");
         logger.debug("Headers: {}", request.getHeaders());
         logger.debug("Body: {}", request.getBody());
 
         try {
-            ResponseEntity<String> response = authRestTemplate.postForEntity(
-                    apiUrl + "/oauth/token",
+            ResponseEntity<String> response = restTemplate.postForEntity(
+                    factusConfig.getUrl() + "/oauth/token",
                     request,
                     String.class);
 
@@ -95,11 +88,9 @@ public class AuthService {
                 authResponse.setAccessToken(this.accessToken);
                 authResponse.setRefreshToken(this.refreshToken);
                 authResponse.setExpiresIn((int) expiresIn);
-                authResponse.setTokenType(jsonNode.get("token_type").asText()); // Configurar token_type
-
+                authResponse.setTokenType(jsonNode.get("token_type").asText());
                 return authResponse;
             } else {
-                logger.error("Fallo en la autenticación con Factus API: Status={}, Body={}", response.getStatusCode(), response.getBody());
                 throw new RuntimeException("Fallo en la autenticación con Factus API: Status=" + response.getStatusCode() + ", Body=" + response.getBody());
             }
         } catch (Exception e) {
@@ -108,30 +99,71 @@ public class AuthService {
         }
     }
 
-    // Método para refrescar el token
+    public AuthResponseDTO register(AuthRequestDTO authRequestDTO) {
+        String email = authRequestDTO.getUsername();
+        String password = authRequestDTO.getPassword() != null ? authRequestDTO.getPassword() : "default-password"; // Usar una contraseña por defecto si no se proporciona
+
+        User existingUser = userRepository.findByEmail(email);
+        if (existingUser != null) {
+            throw new RuntimeException("El usuario con email " + email + " ya existe");
+        }
+
+        // Registrar el correo nuevo localmente
+        User newUser = new User(authRequestDTO.getClient_id(), email, password);
+        newUser.setActive(true); // Marcamos como activado porque usaremos las credenciales por defecto
+        userRepository.save(newUser);
+
+        // Autenticar con las credenciales por defecto de Factus
+        return authenticate(new AuthRequestDTO()); // No pasamos credenciales del usuario, usamos las por defecto
+    }
+
+    public AuthResponseDTO googleSignIn(String email, String idToken) {
+        logger.debug("Procesando autenticación con Google para email: {}", email);
+
+        // Verificar o registrar el usuario localmente
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            // Crear un usuario con una contraseña generada (puedes usar idToken como base)
+            String generatedPassword = "google-auth-" + idToken.substring(0, 8);
+            user = new User(email, email, generatedPassword);
+            user.setActive(true); // Marcamos como activado porque usaremos las credenciales por defecto
+            userRepository.save(user);
+        }
+
+        // Autenticar con las credenciales por defecto de Factus
+        return authenticate(new AuthRequestDTO());
+    }
+
     public void refreshToken() {
         refreshTokenWithRefreshToken();
     }
 
-    // Obtiene un nuevo token usando las credenciales
     public void refreshTokenDirectly() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        headers.set("Accept", "application/json");
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
-        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-        body.add("grant_type", "password");
-        body.add("client_id", clientId);
-        body.add("client_secret", clientSecret);
-        body.add("username", username);
-        body.add("password", password);
+        String encodedPassword;
+        try {
+            encodedPassword = URLEncoder.encode(factusConfig.getPassword(), StandardCharsets.UTF_8.toString());
+        } catch (Exception e) {
+            throw new RuntimeException("Error al codificar la contraseña: " + e.getMessage());
+        }
 
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
+        String body = String.format(
+                "grant_type=password&username=%s&password=%s&client_id=%s&client_secret=%s",
+                factusConfig.getEmail(),
+                encodedPassword,
+                factusConfig.getClientId(),
+                factusConfig.getClientSecret()
+        );
+
+        HttpEntity<String> request = new HttpEntity<>(body, headers);
 
         try {
-            logger.debug("Obteniendo nuevo token con credenciales desde: {}", apiUrl + "/oauth/token");
-            ResponseEntity<String> response = authRestTemplate.postForEntity(
-                    apiUrl + "/oauth/token",
+            logger.debug("Obteniendo nuevo token con credenciales desde: {}", factusConfig.getUrl() + "/oauth/token");
+            ResponseEntity<String> response = restTemplate.postForEntity(
+                    factusConfig.getUrl() + "/oauth/token",
                     request,
                     String.class);
 
@@ -144,7 +176,6 @@ public class AuthService {
 
                 logger.debug("Token refrescado con éxito");
             } else {
-                logger.error("Fallo al obtener el token de acceso: Status={}, Body={}", response.getStatusCode(), response.getBody());
                 throw new RuntimeException("Fallo al obtener el token de acceso: Status=" + response.getStatusCode() + ", Body=" + response.getBody());
             }
         } catch (Exception e) {
@@ -153,29 +184,28 @@ public class AuthService {
         }
     }
 
-    // Intenta usar el refresh token para obtener un nuevo token de acceso
     public void refreshTokenWithRefreshToken() {
         if (refreshToken == null) {
-            refreshTokenDirectly(); // Si no hay refresh token, obtener uno nuevo con las credenciales
+            refreshTokenDirectly();
             return;
         }
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        headers.set("Accept", "application/json");
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", "refresh_token");
-        body.add("client_id", clientId);
-        body.add("client_secret", clientSecret);
+        body.add("client_id", factusConfig.getClientId());
+        body.add("client_secret", factusConfig.getClientSecret());
         body.add("refresh_token", refreshToken);
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
 
         try {
-            logger.debug("Refrescando token usando refresh_token desde: {}", apiUrl + "/oauth/token");
-            ResponseEntity<String> response = authRestTemplate.postForEntity(
-                    apiUrl + "/oauth/token",
+            logger.debug("Refrescando token usando refresh_token desde: {}", factusConfig.getUrl() + "/oauth/token");
+            ResponseEntity<String> response = restTemplate.postForEntity(
+                    factusConfig.getUrl() + "/oauth/token",
                     request,
                     String.class);
 
@@ -197,28 +227,21 @@ public class AuthService {
         }
     }
 
-    // Método auxiliar para construir la solicitud de autenticación
-    private HttpEntity<MultiValueMap<String, String>> buildAuthRequest(AuthRequestDTO authRequestDTO) {
+    private HttpEntity<MultiValueMap<String, String>> buildAuthRequestWithDefaultCredentials() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        headers.set("Accept", "application/json");
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
         MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-        map.add("grant_type", authRequestDTO.getGrant_type() != null ? authRequestDTO.getGrant_type() : "password");
-        map.add("client_id", authRequestDTO.getClient_id() != null ? authRequestDTO.getClient_id() : clientId);
-        map.add("client_secret", authRequestDTO.getClient_secret() != null ? authRequestDTO.getClient_secret() : clientSecret);
-
-        if ("password".equals(authRequestDTO.getGrant_type())) {
-            map.add("username", authRequestDTO.getUsername() != null ? authRequestDTO.getUsername() : username);
-            map.add("password", authRequestDTO.getPassword() != null ? authRequestDTO.getPassword() : password);
-        } else if ("refresh_token".equals(authRequestDTO.getGrant_type())) {
-            map.add("refresh_token", authRequestDTO.getRefresh_token());
-        }
+        map.add("grant_type", "password");
+        map.add("client_id", factusConfig.getClientId());
+        map.add("client_secret", factusConfig.getClientSecret());
+        map.add("username", factusConfig.getEmail());
+        map.add("password", factusConfig.getPassword());
 
         return new HttpEntity<>(map, headers);
     }
 
-    // Método para compatibilidad con el primer documento
     public String getToken() {
         return getAccessToken();
     }

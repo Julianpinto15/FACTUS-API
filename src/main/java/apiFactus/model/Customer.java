@@ -1,6 +1,10 @@
 package apiFactus.model;
 
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+
+
 
 @Entity
 @Table(name = "customers")
@@ -8,7 +12,7 @@ public class Customer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @Column(name = "identification_document_id")
     private Integer identificationDocumentId;
@@ -39,6 +43,9 @@ public class Customer {
     @Column(name = "phone")
     private String phone;
 
+    @Version
+    private Long version = 0L;
+
     @ManyToOne
     @JoinColumn(name = "legal_organization_id")
     private LegalOrganization legal_organization;
@@ -51,11 +58,11 @@ public class Customer {
     @JoinColumn(name = "municipality_id")
     private Municipality municipality;
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -161,5 +168,13 @@ public class Customer {
 
     public void setMunicipality(Municipality municipality) {
         this.municipality = municipality;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 }

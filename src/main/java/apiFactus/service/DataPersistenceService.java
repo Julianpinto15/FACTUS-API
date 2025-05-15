@@ -1,18 +1,9 @@
 package apiFactus.service;
 
-import apiFactus.dto.ApiResponseDTO;
-import apiFactus.dto.MunicipalityDTO;
-import apiFactus.dto.NumberingRangeDTO;
-import apiFactus.dto.TributeDTO;
-import apiFactus.dto.UnitMeasureDTO;
-import apiFactus.model.Municipality;
-import apiFactus.model.NumberingRange;
-import apiFactus.model.Tribute;
-import apiFactus.model.UnitMeasure;
-import apiFactus.repository.MunicipalityRepository;
-import apiFactus.repository.NumberingRangeRepository;
-import apiFactus.repository.TributeRepository;
-import apiFactus.repository.UnitMeasureRepository;
+import apiFactus.dto.*;
+import apiFactus.model.*;
+import apiFactus.model.Customer;
+import apiFactus.repository.*;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +29,9 @@ public class DataPersistenceService implements CommandLineRunner {
     private final TributeRepository tributeRepository;
     private final MunicipalityRepository municipalityRepository;
     private final UnitMeasureRepository unitMeasureRepository;
+    private final LegalOrganizationRepository legalOrganizationRepository;
     private final String apiUrl;
+    private final CustomerRepository customerRepository;
 
     public DataPersistenceService(
             @Qualifier("apiRestTemplate") RestTemplate apiRestTemplate,
@@ -47,14 +40,18 @@ public class DataPersistenceService implements CommandLineRunner {
             TributeRepository tributeRepository,
             MunicipalityRepository municipalityRepository,
             UnitMeasureRepository unitMeasureRepository,
-            @Value("${factus.api.url}") String apiUrl) {
+            LegalOrganizationRepository legalOrganizationRepository,
+            @Value("${factus.api.url}") String apiUrl,
+            CustomerRepository customerRepository) {
         this.apiRestTemplate = apiRestTemplate;
         this.authService = authService;
         this.numberingRangeRepository = numberingRangeRepository;
         this.tributeRepository = tributeRepository;
         this.municipalityRepository = municipalityRepository;
         this.unitMeasureRepository = unitMeasureRepository;
+        this.legalOrganizationRepository = legalOrganizationRepository;
         this.apiUrl = apiUrl;
+        this.customerRepository = customerRepository;
     }
 
     @Override
@@ -84,17 +81,14 @@ public class DataPersistenceService implements CommandLineRunner {
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null && response.getBody().getData() != null) {
                 for (NumberingRangeDTO rangeDTO : response.getBody().getData()) {
                     try {
-                        // Buscar si la entity ya existe
                         NumberingRange existingRange = numberingRangeRepository.findById(rangeDTO.getId())
                                 .orElse(new NumberingRange());
 
-                        // Actualizar o crear la entity
                         logger.debug("Processing NumberingRange#{}", rangeDTO.getId());
                         existingRange.setId(rangeDTO.getId());
                         existingRange.setPrefix(rangeDTO.getPrefix());
                         existingRange.setStart_number(rangeDTO.getFrom());
                         existingRange.setEnd_number(rangeDTO.getTo());
-                        // No asignar version manualmente, dejar que Hibernate lo gestione
 
                         NumberingRange savedRange = numberingRangeRepository.save(existingRange);
                         logger.debug("Saved NumberingRange#{} with version {}", savedRange.getId(), savedRange.getVersion());
@@ -122,16 +116,13 @@ public class DataPersistenceService implements CommandLineRunner {
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null && response.getBody().getData() != null) {
                 for (TributeDTO tributeDTO : response.getBody().getData()) {
                     try {
-                        // Buscar si la entidad ya existe
                         Tribute existingTribute = tributeRepository.findById(tributeDTO.getId())
                                 .orElse(new Tribute());
 
-                        // Actualizar o crear la entidad
                         logger.debug("Processing Tribute#{}", tributeDTO.getId());
                         existingTribute.setId(tributeDTO.getId());
                         existingTribute.setCode(tributeDTO.getCode());
                         existingTribute.setName(tributeDTO.getName());
-                        // No asignar version manualmente, dejar que Hibernate lo gestione
 
                         Tribute savedTribute = tributeRepository.save(existingTribute);
                         logger.debug("Saved Tribute#{} with version {}", savedTribute.getId(), savedTribute.getVersion());
@@ -159,15 +150,12 @@ public class DataPersistenceService implements CommandLineRunner {
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null && response.getBody().getData() != null) {
                 for (MunicipalityDTO municipalityDTO : response.getBody().getData()) {
                     try {
-                        // Buscar si la entity ya existe
                         Municipality existingMunicipality = municipalityRepository.findById(municipalityDTO.getId())
                                 .orElse(new Municipality());
 
-                        // Actualizar o crear la entity
                         logger.debug("Processing Municipality#{}", municipalityDTO.getId());
                         existingMunicipality.setId(municipalityDTO.getId());
                         existingMunicipality.setName(municipalityDTO.getName());
-                        // No asignar version manualmente, dejar que Hibernate lo gestione
 
                         Municipality savedMunicipality = municipalityRepository.save(existingMunicipality);
                         logger.debug("Saved Municipality#{} with version {}", savedMunicipality.getId(), savedMunicipality.getVersion());
@@ -195,16 +183,13 @@ public class DataPersistenceService implements CommandLineRunner {
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null && response.getBody().getData() != null) {
                 for (UnitMeasureDTO unitMeasureDTO : response.getBody().getData()) {
                     try {
-                        // Buscar si la entidad ya existe
                         UnitMeasure existingUnitMeasure = unitMeasureRepository.findById(unitMeasureDTO.getId())
                                 .orElse(new UnitMeasure());
 
-                        // Actualizar o crear la entidad
                         logger.debug("Processing UnitMeasure#{}", unitMeasureDTO.getId());
                         existingUnitMeasure.setId(unitMeasureDTO.getId());
                         existingUnitMeasure.setName(unitMeasureDTO.getName());
                         existingUnitMeasure.setCode(unitMeasureDTO.getCode());
-                        // No asignar version manualmente, dejar que Hibernate lo gestione
 
                         UnitMeasure savedUnitMeasure = unitMeasureRepository.save(existingUnitMeasure);
                         logger.debug("Saved UnitMeasure#{} with version {}", savedUnitMeasure.getId(), savedUnitMeasure.getVersion());
@@ -221,6 +206,60 @@ public class DataPersistenceService implements CommandLineRunner {
         }
     }
 
+    private void saveCustomerFromInvoice(CustomerDTO customerDTO) {
+        if (customerDTO.getId() == null) {
+            logger.warn("Skipping customer with null identification");
+            return;
+        }
+
+        Customer existingCustomer = customerRepository.findById(customerDTO.getId())
+                .orElse(new Customer());
+
+        existingCustomer.setIdentification(customerDTO.getIdentification());
+        existingCustomer.setIdentificationDocumentId(customerDTO.getIdentification_document_id());
+        existingCustomer.setDv(customerDTO.getDv());
+        existingCustomer.setGraphic_representation_name(customerDTO.getGraphic_representation_name());
+        existingCustomer.setCompany(customerDTO.getCompany());
+        existingCustomer.setTradeName(customerDTO.getTrade_name());
+        existingCustomer.setNames(customerDTO.getNames());
+        existingCustomer.setAddress(customerDTO.getAddress());
+        existingCustomer.setEmail(customerDTO.getEmail());
+        existingCustomer.setPhone(customerDTO.getPhone());
+
+        if (customerDTO.getLegalOrganizationId() != null) {
+            try {
+                LegalOrganization legalOrg = legalOrganizationRepository.findById(Integer.parseInt(customerDTO.getLegalOrganizationId()))
+                        .orElse(null);
+                existingCustomer.setLegal_organization(legalOrg);
+            } catch (NumberFormatException e) {
+                logger.warn("Invalid legal_organization_id: {}", customerDTO.getLegalOrganizationId());
+            }
+        }
+
+        if (customerDTO.getTributeId() != null) {
+            try {
+                Tribute tribute = tributeRepository.findById(Integer.parseInt(customerDTO.getTributeId()))
+                        .orElse(null);
+                existingCustomer.setTribute(tribute);
+            } catch (NumberFormatException e) {
+                logger.warn("Invalid tribute_id: {}", customerDTO.getTributeId());
+            }
+        }
+
+        if (customerDTO.getMunicipalityId() != null) {
+            try {
+                Municipality municipality = municipalityRepository.findById(Integer.parseInt(customerDTO.getMunicipalityId()))
+                        .orElse(null);
+                existingCustomer.setMunicipality(municipality);
+            } catch (NumberFormatException e) {
+                logger.warn("Invalid municipality_id: {}", customerDTO.getMunicipalityId());
+            }
+        }
+
+        Customer savedCustomer = customerRepository.save(existingCustomer);
+        logger.debug("Saved Customer#{} with version {}", savedCustomer.getId(), savedCustomer.getVersion());
+    }
+
     public List<NumberingRange> getNumberingRanges() {
         return numberingRangeRepository.findAll();
     }
@@ -235,5 +274,9 @@ public class DataPersistenceService implements CommandLineRunner {
 
     public List<UnitMeasure> getUnitMeasures() {
         return unitMeasureRepository.findAll();
+    }
+
+    public List<Customer> getCustomers() {
+        return customerRepository.findAll();
     }
 }

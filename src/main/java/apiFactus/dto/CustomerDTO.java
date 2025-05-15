@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class CustomerDTO {
 
+    private String id;
+
     private Integer identification_document_id;
     private String identification;
     private Integer dv;
@@ -51,6 +53,14 @@ public class CustomerDTO {
         this.legal_organization = legal_organization;
         this.tribute = tribute;
         this.municipality = municipality;
+    }
+
+    public String getId() {
+        return identification;
+    }
+
+    public void setId(String id) {
+        this.identification = id;
     }
 
     public Integer getIdentification_document_id() {
