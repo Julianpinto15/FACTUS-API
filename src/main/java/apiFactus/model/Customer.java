@@ -1,15 +1,10 @@
 package apiFactus.model;
 
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-
-
 
 @Entity
 @Table(name = "customers")
 public class Customer {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;

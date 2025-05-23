@@ -27,6 +27,7 @@ public class InvoiceService {
     private final RestTemplate restTemplate;
     private final AuthService authService;
     private final InvoiceRepository invoiceRepository;
+    private final CustomerService customerService;
     private final CustomerRepository customerRepository;
     private final MunicipalityRepository MunicipalityRepository;
     private final TributeRepository tributeRepository;
@@ -39,6 +40,7 @@ public class InvoiceService {
             @Qualifier("apiRestTemplate") RestTemplate restTemplate,
             AuthService authService,
             InvoiceRepository invoiceRepository,
+            CustomerService customerService,
             CustomerRepository customerRepository,
             MunicipalityRepository municipalityRepository,
             TributeRepository tributeRepository,
@@ -46,6 +48,7 @@ public class InvoiceService {
         this.restTemplate = restTemplate;
         this.authService = authService;
         this.invoiceRepository = invoiceRepository;
+        this.customerService = customerService ;
         this.customerRepository = customerRepository;
         this.MunicipalityRepository = municipalityRepository;
         this.tributeRepository = tributeRepository;
@@ -88,14 +91,21 @@ public class InvoiceService {
 
     @Transactional
     public void saveInvoiceToDatabase(InvoiceRequestDTO invoiceRequest, InvoiceResponseDTO invoiceResponse) {
-        // Validar parámetros de entrada
+
         Objects.requireNonNull(invoiceRequest, "InvoiceRequestDTO cannot be null");
         Objects.requireNonNull(invoiceResponse, "InvoiceResponseDTO cannot be null");
         Objects.requireNonNull(invoiceResponse.getData(), "InvoiceResponseDTO data cannot be null");
         Objects.requireNonNull(invoiceResponse.getData().getBill(), "InvoiceResponseDTO bill data cannot be null");
 
-        // Buscar o crear el cliente
+        // Obtener cliente existente
         Customer customer = customerRepository.findByIdentification(invoiceRequest.getCustomer().getIdentification());
+        if (customer == null) {
+            throw new IllegalArgumentException("Cliente con identificación " + invoiceRequest.getCustomer().getIdentification() + " no encontrado");
+        }
+
+
+        // Buscar o crear el cliente
+        Customer customer1 = customerRepository.findByIdentification(invoiceRequest.getCustomer().getIdentification());
         if (customer == null) {
             customer = new Customer();
             customer.setIdentificationDocumentId(invoiceRequest.getCustomer().getIdentification_document_id());
@@ -110,40 +120,48 @@ public class InvoiceService {
             customer.setPhone(invoiceRequest.getCustomer().getPhone());
 
             // Configurar relaciones
-            if (invoiceRequest.getCustomer().getLegal_organization() != null) {
-                LegalOrganization legalOrganization = legalOrganizationRepository.findById(invoiceRequest.getCustomer().getLegal_organization().getId())
+            if (invoiceRequest.getCustomer().getLegalOrganizationId() != null) {
+                Integer legalOrgId = Integer.valueOf(invoiceRequest.getCustomer().getLegalOrganizationId());
+
+                LegalOrganization legalOrganization = legalOrganizationRepository.findById(legalOrgId)
                         .orElseGet(() -> {
                             LegalOrganization newLegalOrganization = new LegalOrganization();
-                            newLegalOrganization.setId(invoiceRequest.getCustomer().getLegal_organization().getId());
-                            newLegalOrganization.setCode(invoiceRequest.getCustomer().getLegal_organization().getCode());
-                            newLegalOrganization.setName(invoiceRequest.getCustomer().getLegal_organization().getName());
+                            newLegalOrganization.setId(legalOrgId);
+                            newLegalOrganization.setCode("DEFAULT_CODE"); // Ajusta si tienes el valor
+                            newLegalOrganization.setName("DEFAULT_NAME"); // Ajusta si tienes el valor
                             return legalOrganizationRepository.save(newLegalOrganization);
                         });
+
                 customer.setLegal_organization(legalOrganization);
             }
 
-            if (invoiceRequest.getCustomer().getTribute() != null) {
-                Tribute tribute = tributeRepository.findById(invoiceRequest.getCustomer().getTribute().getId())
+            if (invoiceRequest.getCustomer().getTributeId() != null) {
+                Integer tributeId = Integer.valueOf(invoiceRequest.getCustomer().getTributeId());
+
+                Tribute tribute = tributeRepository.findById(tributeId)
                         .orElseGet(() -> {
                             Tribute newTribute = new Tribute();
-                            newTribute.setId(invoiceRequest.getCustomer().getTribute().getId());
-                            newTribute.setCode(invoiceRequest.getCustomer().getTribute().getCode());
-                            newTribute.setName(invoiceRequest.getCustomer().getTribute().getName());
+                            newTribute.setId(tributeId);
+                            newTribute.setCode("DEFAULT_CODE");
+                            newTribute.setName("DEFAULT_NAME");
                             return tributeRepository.save(newTribute);
                         });
+
                 customer.setTribute(tribute);
             }
 
-            if (invoiceRequest.getCustomer().getMunicipality() != null) {
-                Municipality municipality = MunicipalityRepository.findById(invoiceRequest.getCustomer().getMunicipality().getId())
+            if (invoiceRequest.getCustomer().getMunicipalityId() != null) {
+                Integer municipalityId = Integer.valueOf(invoiceRequest.getCustomer().getMunicipalityId());
+
+                Municipality municipality = MunicipalityRepository.findById(municipalityId)
                         .orElseGet(() -> {
                             Municipality newMunicipality = new Municipality();
-                            newMunicipality.setId(invoiceRequest.getCustomer().getMunicipality().getId());
-                            newMunicipality.setCode(invoiceRequest.getCustomer().getMunicipality().getCode());
-                            newMunicipality.setName(invoiceRequest.getCustomer().getMunicipality().getName());
-                            // Nota: El campo 'department' no está en el DTO, así que lo dejamos como null o podrías agregar un valor por defecto
+                            newMunicipality.setId(municipalityId);
+                            newMunicipality.setCode("DEFAULT_CODE");
+                            newMunicipality.setName("DEFAULT_NAME");
                             return MunicipalityRepository.save(newMunicipality);
                         });
+
                 customer.setMunicipality(municipality);
             }
 

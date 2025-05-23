@@ -3,12 +3,11 @@ package apiFactus.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "legal_organizations")
+@Table(name = "legal_organization")
 public class LegalOrganization {
 
     @Id
     private Integer id;
-
     private String code;
     private String name;
 
@@ -47,4 +46,15 @@ public class LegalOrganization {
     public void setVersion(Long version) {
         this.version = version;
     }
+
+    @Override
+    public String toString() {
+        return "LegalOrganization{" +
+                "id=" + id +
+                ", code='" + code + '\'' +
+                ", name='" + name + '\'' +
+                ", version=" + version +
+                '}';
+    }
+
 }

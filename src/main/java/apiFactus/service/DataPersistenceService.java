@@ -11,12 +11,16 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class DataPersistenceService implements CommandLineRunner {
@@ -68,6 +72,9 @@ public class DataPersistenceService implements CommandLineRunner {
         fetchAndStoreTributes();
         fetchAndStoreMunicipalities();
         fetchAndStoreUnitMeasures();
+        //saveCustomerFromInvoice();
+       // saveCustomerFromInvoice();
+        syncLegalOrganizations();
     }
 
     private void fetchAndStoreNumberingRanges() {
@@ -260,6 +267,50 @@ public class DataPersistenceService implements CommandLineRunner {
         logger.debug("Saved Customer#{} with version {}", savedCustomer.getId(), savedCustomer.getVersion());
     }
 
+    private void syncLegalOrganizations() {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", "Bearer " + authService.getAccessToken());
+            HttpEntity<String> request = new HttpEntity<>(headers);
+
+            logger.debug("Fetching legal organizations from {}", apiUrl + "/v1/countries?name=");
+            ResponseEntity<ApiResponseDTO<CountryDTO>> response = apiRestTemplate.exchange(
+                    apiUrl + "/v1/countries?name=",
+                    HttpMethod.GET,
+                    request,
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null && response.getBody().getData() != null) {
+                List<CountryDTO> countryDTOs = response.getBody().getData();
+                logger.debug("Received {} countries: {}", countryDTOs.size(), countryDTOs);
+
+                List<LegalOrganization> organizations = countryDTOs.stream()
+                        .map(dto -> {
+                            LegalOrganization org = new LegalOrganization();
+                            org.setId(dto.getId());
+                            org.setCode(dto.getCode());
+                            org.setName(dto.getName());
+                            org.setVersion(0L); // Inicializar version
+                            return org;
+                        })
+                        .collect(Collectors.toList());
+
+                if (!organizations.isEmpty()) {
+                    legalOrganizationRepository.deleteAll();
+                    legalOrganizationRepository.saveAll(organizations);
+                    logger.info("Legal Organizations sincronizadas: {}", organizations);
+                } else {
+                    logger.warn("No se encontraron organizaciones legales en Factus");
+                }
+            } else {
+                logger.warn("Respuesta vacía o inválida desde /v1/countries");
+            }
+        } catch (Exception e) {
+            logger.error("Error al sincronizar organizaciones legales: {}", e.getMessage(), e);
+        }
+    }
+
     public List<NumberingRange> getNumberingRanges() {
         return numberingRangeRepository.findAll();
     }
@@ -278,5 +329,9 @@ public class DataPersistenceService implements CommandLineRunner {
 
     public List<Customer> getCustomers() {
         return customerRepository.findAll();
+    }
+
+    public List<LegalOrganization> getLegalOrganizations() {
+        return legalOrganizationRepository.findAll();
     }
 }

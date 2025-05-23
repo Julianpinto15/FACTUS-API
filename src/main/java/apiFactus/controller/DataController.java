@@ -1,20 +1,32 @@
 package apiFactus.controller;
 
-import apiFactus.model.Municipality;
-import apiFactus.model.NumberingRange;
-import apiFactus.model.Tribute;
-import apiFactus.model.UnitMeasure;
+import apiFactus.model.*;
+import apiFactus.repository.LegalOrganizationRepository;
+import apiFactus.repository.MunicipalityRepository;
+import apiFactus.repository.TributeRepository;
 import apiFactus.service.DataPersistenceService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
+@RequestMapping("/api")
 public class DataController {
 
     private final DataPersistenceService dataPersistenceService;
+
+    @Autowired
+    private MunicipalityRepository municipalityRepository;
+
+    @Autowired
+    private LegalOrganizationRepository legalOrganizationRepository;
+
+    @Autowired
+    private TributeRepository tributeRepository;
 
     public DataController(DataPersistenceService dataPersistenceService) {
         this.dataPersistenceService = dataPersistenceService;
@@ -25,18 +37,18 @@ public class DataController {
         return ResponseEntity.ok(dataPersistenceService.getNumberingRanges());
     }
 
-    @GetMapping("/tributes")
-    public ResponseEntity<List<Tribute>> getTributes() {
-        return ResponseEntity.ok(dataPersistenceService.getTributes());
-    }
-
     @GetMapping("/municipalities")
     public ResponseEntity<List<Municipality>> getMunicipalities() {
-        return ResponseEntity.ok(dataPersistenceService.getMunicipalities());
+        return ResponseEntity.ok(municipalityRepository.findAll());
     }
 
-    @GetMapping("/unit-measures")
-    public ResponseEntity<List<UnitMeasure>> getUnitMeasures() {
-        return ResponseEntity.ok(dataPersistenceService.getUnitMeasures());
+    @GetMapping("/legal-organizations")
+    public ResponseEntity<List<LegalOrganization>> getLegalOrganizations() {
+        return ResponseEntity.ok(legalOrganizationRepository.findAll());
+    }
+
+    @GetMapping("/tributes")
+    public ResponseEntity<List<Tribute>> getTributes() {
+        return ResponseEntity.ok(tributeRepository.findAll());
     }
 }

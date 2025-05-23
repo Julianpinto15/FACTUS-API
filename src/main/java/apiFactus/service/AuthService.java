@@ -21,6 +21,7 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -153,7 +154,7 @@ public class AuthService {
         String body = String.format(
                 "grant_type=password&username=%s&password=%s&client_id=%s&client_secret=%s",
                 factusConfig.getEmail(),
-                encodedPassword,
+                factusConfig.getPassword(), // Sin codificar
                 factusConfig.getClientId(),
                 factusConfig.getClientSecret()
         );
@@ -237,7 +238,18 @@ public class AuthService {
         map.add("client_id", factusConfig.getClientId());
         map.add("client_secret", factusConfig.getClientSecret());
         map.add("username", factusConfig.getEmail());
+
+        // NO codificar la contraseña - enviarla tal como está
         map.add("password", factusConfig.getPassword());
+
+        // Logs para debug (remover en producción)
+        logger.debug("=== CREDENCIALES OAUTH ===");
+        logger.debug("URL: {}", factusConfig.getUrl());
+        logger.debug("Client ID: {}", factusConfig.getClientId());
+        logger.debug("Client Secret: {}", factusConfig.getClientSecret() != null ? "***configurado***" : "NULL");
+        logger.debug("Username: {}", factusConfig.getEmail());
+        logger.debug("Password original: {}", factusConfig.getPassword());
+        logger.debug("==========================");
 
         return new HttpEntity<>(map, headers);
     }

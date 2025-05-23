@@ -1,42 +1,58 @@
 package apiFactus.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotNull; // Para Jakarta EE 9 o superior
+
 
 public class CustomerDTO {
 
-    private String id;
+    private String id; // Para compatibilidad con el frontend, pero no se usa en Factus
 
+    @NotNull(message = "identification_document_id es obligatorio")
     private Integer identification_document_id;
+
+    @NotNull(message = "identification es obligatorio")
     private String identification;
+
     private Integer dv;
+
     private String graphic_representation_name;
     private String company;
     private String trade_name;
+
+    @NotNull(message = "names es obligatorio")
     private String names;
+
+    @NotNull(message = "address es obligatorio")
     private String address;
+
+    @NotNull(message = "email es obligatorio")
     private String email;
+
+    @NotNull(message = "phone es obligatorio")
     private String phone;
 
+    @NotNull(message = "legal_organization_id es obligatorio")
     @JsonProperty("legal_organization_id")
     private String legalOrganizationId;
 
+    @NotNull(message = "tribute_id es obligatorio")
     @JsonProperty("tribute_id")
     private String tributeId;
 
+    @NotNull(message = "municipality_id es obligatorio")
     @JsonProperty("municipality_id")
     private String municipalityId;
 
-    @JsonIgnore
-    private LegalOrganizationDTO legal_organization;
-
-    private TributeDTO tribute;
-    private MunicipalityDTO municipality;
-
+    // Constructor vacío
     public CustomerDTO() {
     }
 
-    public CustomerDTO(Integer identification_document_id, String identification, Integer dv, String graphic_representation_name, String company, String trade_name, String names, String address, String email, String phone, String legalOrganizationId, String tributeId, String municipalityId, LegalOrganizationDTO legal_organization, TributeDTO tribute, MunicipalityDTO municipality) {
+    // Constructor completo
+    public CustomerDTO(Integer identification_document_id, String identification, Integer dv, String graphic_representation_name,
+                       String company, String trade_name, String names, String address, String email, String phone,
+                       String legalOrganizationId, String tributeId, String municipalityId) {
         this.identification_document_id = identification_document_id;
         this.identification = identification;
         this.dv = dv;
@@ -50,9 +66,6 @@ public class CustomerDTO {
         this.legalOrganizationId = legalOrganizationId;
         this.tributeId = tributeId;
         this.municipalityId = municipalityId;
-        this.legal_organization = legal_organization;
-        this.tribute = tribute;
-        this.municipality = municipality;
     }
 
     public String getId() {
@@ -151,42 +164,7 @@ public class CustomerDTO {
         this.legalOrganizationId = legalOrganizationId;
     }
 
-    // Getter que convierte el ID en objeto
-    public LegalOrganizationDTO getLegal_organization() {
-        if (legal_organization == null && legalOrganizationId != null) {
-            legal_organization = new LegalOrganizationDTO();
-            legal_organization.setId(Integer.parseInt(legalOrganizationId));
-        }
-        return legal_organization;
-    }
 
-    public void setLegal_organization(LegalOrganizationDTO legal_organization) {
-        this.legal_organization = legal_organization;
-    }
-
-    public TributeDTO getTribute() {
-        if (tribute == null && tributeId != null) {
-            tribute = new TributeDTO();
-            tribute.setId(Integer.parseInt(tributeId));
-        }
-        return tribute;
-    }
-
-    public void setTribute(TributeDTO tribute) {
-        this.tribute = tribute;
-    }
-
-    public MunicipalityDTO getMunicipality() {
-        if (municipality == null && municipalityId != null) {
-            municipality = new MunicipalityDTO();
-            municipality.setId(Integer.parseInt(municipalityId));
-        }
-        return municipality;
-    }
-
-    public void setMunicipality(MunicipalityDTO municipality) {
-        this.municipality = municipality;
-    }
 
     public String getTributeId() {
         return tributeId;
