@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -285,21 +286,24 @@ public class DataPersistenceService implements CommandLineRunner {
                 List<CountryDTO> countryDTOs = response.getBody().getData();
                 logger.debug("Received {} countries: {}", countryDTOs.size(), countryDTOs);
 
-                List<LegalOrganization> organizations = countryDTOs.stream()
-                        .map(dto -> {
-                            LegalOrganization org = new LegalOrganization();
-                            org.setId(dto.getId());
-                            org.setCode(dto.getCode());
-                            org.setName(dto.getName());
-                            org.setVersion(0L); // Inicializar version
-                            return org;
-                        })
-                        .collect(Collectors.toList());
+                List<LegalOrganization> organizations = new ArrayList<>();
+                for (CountryDTO dto : countryDTOs) {
+                    // Verificar si la LegalOrganization ya existe
+                    LegalOrganization existingOrg = legalOrganizationRepository.findById(dto.getId())
+                            .orElse(new LegalOrganization());
+
+                    existingOrg.setId(dto.getId());
+                    existingOrg.setCode(dto.getCode());
+                    existingOrg.setName(dto.getName());
+                    existingOrg.setVersion(existingOrg.getVersion() != null ? existingOrg.getVersion() : 0L);
+
+                    organizations.add(existingOrg);
+                }
 
                 if (!organizations.isEmpty()) {
-                    legalOrganizationRepository.deleteAll();
+                    // Guardar solo las organizaciones nuevas o actualizadas, sin eliminar las existentes
                     legalOrganizationRepository.saveAll(organizations);
-                    logger.info("Legal Organizations sincronizadas: {}", organizations);
+                    logger.info("Legal Organizations sincronizadas: {}", organizations.size());
                 } else {
                     logger.warn("No se encontraron organizaciones legales en Factus");
                 }
