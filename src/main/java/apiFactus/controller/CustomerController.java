@@ -14,6 +14,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/customers")
@@ -24,8 +25,10 @@ public class CustomerController {
     private CustomerService customerService;
 
     @GetMapping
-    public ResponseEntity<List<CustomerDTO>> getAllCustomers() {
-        return ResponseEntity.ok(customerService.getAllCustomers());
+    public ResponseEntity<Map<String, Object>> getAllCustomers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(customerService.getAllCustomers(page, size));
     }
 
     @PostMapping

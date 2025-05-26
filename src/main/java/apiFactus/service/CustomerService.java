@@ -14,6 +14,10 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -21,7 +25,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -100,8 +107,11 @@ public class CustomerService {
         return customerDTO;
     }
 
-    public List<CustomerDTO> getAllCustomers() {
-        return customerRepository.findAll().stream()
+    public Map<String, Object> getAllCustomers(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Customer> customerPage = customerRepository.findAll(pageable);
+
+        List<CustomerDTO> customerDTOs = customerPage.getContent().stream()
                 .map(customer -> {
                     CustomerDTO dto = new CustomerDTO();
                     dto.setIdentification_document_id(customer.getIdentificationDocumentId());
@@ -120,5 +130,10 @@ public class CustomerService {
                     return dto;
                 })
                 .collect(Collectors.toList());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("data", customerDTOs);
+        response.put("total", customerPage.getTotalElements());
+        return response;
     }
 }

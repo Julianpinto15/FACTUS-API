@@ -98,14 +98,15 @@ public class InvoiceService {
         Objects.requireNonNull(invoiceResponse.getData().getBill(), "InvoiceResponseDTO bill data cannot be null");
 
         // Obtener cliente existente
-        Customer customer = customerRepository.findByIdentification(invoiceRequest.getCustomer().getIdentification());
+
+       /* Customer customer = customerRepository.findByIdentification(invoiceRequest.getCustomer().getIdentification());
         if (customer == null) {
             throw new IllegalArgumentException("Cliente con identificación " + invoiceRequest.getCustomer().getIdentification() + " no encontrado");
-        }
+        }*/
 
 
         // Buscar o crear el cliente
-        Customer customer1 = customerRepository.findByIdentification(invoiceRequest.getCustomer().getIdentification());
+        Customer customer = customerRepository.findByIdentification(invoiceRequest.getCustomer().getIdentification());
         if (customer == null) {
             customer = new Customer();
             customer.setIdentificationDocumentId(invoiceRequest.getCustomer().getIdentification_document_id());
