@@ -42,6 +42,12 @@ public class Product {
     @Column(name = "active")
     private Boolean active = true;
 
+    @Column(nullable = false)
+    private Integer quantity = 1; // Nuevo campo
+
+    @Column(name = "discount_rate", nullable = false)
+    private Double discountRate = 0.0;
+
     public Long getId() {
         return id;
     }
@@ -120,6 +126,22 @@ public class Product {
 
     public void setTributeId(Integer tributeId) {
         this.tributeId = tributeId;
+    }
+
+    public Integer getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
+    }
+
+    public Double getDiscountRate() {
+        return discountRate;
+    }
+
+    public void setDiscountRate(Double discountRate) {
+        this.discountRate = discountRate;
     }
 
     @Override

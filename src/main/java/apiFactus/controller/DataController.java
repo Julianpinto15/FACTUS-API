@@ -4,6 +4,7 @@ import apiFactus.model.*;
 import apiFactus.repository.LegalOrganizationRepository;
 import apiFactus.repository.MunicipalityRepository;
 import apiFactus.repository.TributeRepository;
+import apiFactus.repository.UnitMeasureRepository;
 import apiFactus.service.DataPersistenceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +29,11 @@ public class DataController {
     @Autowired
     private TributeRepository tributeRepository;
 
+    @Autowired
+    private UnitMeasureRepository unitMeasureRepository;
+
+
+
     public DataController(DataPersistenceService dataPersistenceService) {
         this.dataPersistenceService = dataPersistenceService;
     }
@@ -50,5 +56,10 @@ public class DataController {
     @GetMapping("/tributes")
     public ResponseEntity<List<Tribute>> getTributes() {
         return ResponseEntity.ok(tributeRepository.findAll());
+    }
+
+    @GetMapping("/unit-measures")
+    public ResponseEntity<List<UnitMeasure>> getUnitMeasures() {
+        return ResponseEntity.ok(unitMeasureRepository.findAll());
     }
 }

@@ -25,7 +25,7 @@ public class SecurityConfig {
                     return config;
                 }))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/oauth/token", "/oauth/refresh", "/register", "/auth/google", "/api/customers", "/api/municipalities", "/api/legal-organizations", "/api/tributes").permitAll()
+                        .requestMatchers("/oauth/token", "/oauth/refresh", "/register", "/auth/google", "/api/customers","/api/products", "/api/unit-measures","/api/standard-codes", "/api/municipalities", "/api/legal-organizations", "/api/tributes").permitAll()
                         .requestMatchers("/v1/bills/**").permitAll()
                         .anyRequest().authenticated()
                 )
