@@ -6,6 +6,9 @@ import java.util.List;
 
 public class InvoiceRequestDTO {
 
+    @JsonProperty("document")
+    private String document;
+
     @JsonProperty("numbering_range_id")
     private Integer numbering_range_id;
 
@@ -34,6 +37,14 @@ public class InvoiceRequestDTO {
     private List<ItemDTO> items;
 
     public InvoiceRequestDTO() {
+    }
+
+    public String getDocument() {
+        return document;
+    }
+
+    public void setDocument(String document) {
+        this.document = document;
     }
 
     public Integer getNumbering_range_id() {

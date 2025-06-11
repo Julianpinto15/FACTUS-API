@@ -19,7 +19,18 @@ public class InvoiceController {
 
     @PostMapping
     public ResponseEntity<InvoiceResponseDTO> createInvoice(@RequestBody InvoiceRequestDTO request) {
-        InvoiceResponseDTO response = invoiceService.createInvoice(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response); // 201 Created
+        try {
+            InvoiceResponseDTO response = invoiceService.createInvoice(request);
+            if (response != null && "Created".equals(response.getStatus())) {
+                return ResponseEntity.status(HttpStatus.CREATED).body(response); // 201 Created
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response); // 400 Bad Request
+            }
+        } catch (RuntimeException e) {
+            InvoiceResponseDTO errorResponse = new InvoiceResponseDTO();
+            errorResponse.setStatus("Error");
+            errorResponse.setMessage(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse); // 500 Internal Server Error
+        }
     }
 }
