@@ -2,6 +2,8 @@ package apiFactus.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
@@ -25,7 +27,21 @@ public class SecurityConfig {
                     return config;
                 }))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/oauth/token", "/oauth/refresh", "/register", "/auth/google", "/api/customers","/api/products", "/api/unit-measures","/api/standard-codes", "/api/municipalities", "/api/legal-organizations", "/api/tributes", "/v1/bills/validate").permitAll()
+                        .requestMatchers("/oauth/token", "/oauth/refresh",
+                                "/register",
+                                "/auth/google",
+                                "/api/customers",
+                                "/api/products",
+                                "/api/unit-measures",
+                                "/api/standard-codes",
+                                "/api/municipalities",
+                                "/api/legal-organizations",
+                                "/api/tributes",
+                                "/v1/bills/validate",
+                                "/download-xml/{number}",
+                                "/validate/paginated",
+                                "/show/{number}",
+                                "/download-pdf/{number}").permitAll()
                         .requestMatchers("/v1/bills/**").permitAll()
                         .anyRequest().authenticated()
                 )
@@ -33,4 +49,5 @@ public class SecurityConfig {
 
         return http.build();
     }
+
 }
