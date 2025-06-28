@@ -548,24 +548,58 @@ public class InvoiceService {
         }
     }
 
+    // Método corregido en InvoiceService.java
     public PaginatedResponse<InvoiceListDTO> getPaginatedInvoices(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Invoice> invoicePage = invoiceRepository.findAll(pageable);
 
         List<InvoiceListDTO> dtoList = invoicePage.getContent().stream()
-                .map(invoice -> new InvoiceListDTO(
-                        invoice.getId(),
-                        invoice.getInvoiceNumber(),
-                        invoice.getInvoiceUuid(),
-                        invoice.getCustomer() != null ? invoice.getCustomer().getCompany() : "Sin cliente",
-                        invoice.getCreatedAt(),
-                        String.valueOf(invoice.getStatus())
-                ))
+                .map(invoice -> {
+                    InvoiceListDTO dto = new InvoiceListDTO();
+                    dto.setId(invoice.getId());
+                    dto.setInvoiceNumber(invoice.getInvoiceNumber());
+                    dto.setInvoiceUuid(invoice.getInvoiceUuid());
+                    dto.setCreatedAt(invoice.getCreatedAt());
+                    dto.setStatus(getStatusDisplayName(invoice.getStatus()));
+
+                    // Construir el CustomerDTO correctamente
+                    if (invoice.getCustomer() != null) {
+                        Customer customer = invoice.getCustomer();
+                        InvoiceListDTO.CustomerDTO customerDTO = new InvoiceListDTO.CustomerDTO();
+
+                        // Priorizar company sobre names
+                        if (customer.getCompany() != null && !customer.getCompany().trim().isEmpty()) {
+                            customerDTO.setCompany(customer.getCompany());
+                        } else if (customer.getNames() != null && !customer.getNames().trim().isEmpty()) {
+                            customerDTO.setNames(customer.getNames());
+                        }
+
+                        dto.setCustomer(customerDTO);
+                    } else {
+                        // Si no hay customer, crear un DTO vacío
+                        InvoiceListDTO.CustomerDTO emptyCustomer = new InvoiceListDTO.CustomerDTO();
+                        dto.setCustomer(emptyCustomer);
+                    }
+
+                    return dto;
+                })
                 .toList();
 
         return new PaginatedResponse<>(dtoList, invoicePage.getTotalElements());
     }
 
+    private String getStatusDisplayName(Integer status) {
+        if (status == null) return "Desconocido";
+
+        return switch (status) {
+            case 0 -> "Borrador";
+            case 1 -> "Enviada";
+            case 2 -> "Pendiente";
+            case 3 -> "Pagada";
+            case 4 -> "Cancelada";
+            default -> "Estado " + status;
+        };
+    }
 
     public List<Invoice> getAllInvoices() {
         return invoiceRepository.findAll();

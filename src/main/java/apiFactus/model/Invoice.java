@@ -55,6 +55,9 @@ public class Invoice {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    private String document;
+    private Integer numberingRangeId;
+
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
@@ -207,5 +210,21 @@ public class Invoice {
 
     public void setItems(List<InvoiceItem> items) {
         this.items = items;
+    }
+
+    public String getDocument() {
+        return document;
+    }
+
+    public void setDocument(String document) {
+        this.document = document;
+    }
+
+    public Integer getNumberingRangeId() {
+        return numberingRangeId;
+    }
+
+    public void setNumberingRangeId(Integer numberingRangeId) {
+        this.numberingRangeId = numberingRangeId;
     }
 }

@@ -2,6 +2,7 @@ package apiFactus.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class InvoiceRequestDTO {
@@ -26,6 +27,10 @@ public class InvoiceRequestDTO {
 
     @JsonProperty("payment_form")
     private String payment_form; // Cambiado a String
+
+    private LocalDateTime createdAt;
+
+    private String status;
 
     @JsonProperty("billing_period")
     private BillingPeriodDTO billing_period;
@@ -117,5 +122,21 @@ public class InvoiceRequestDTO {
 
     public void setItems(List<ItemDTO> items) {
         this.items = items;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

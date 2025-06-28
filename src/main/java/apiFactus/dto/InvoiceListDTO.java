@@ -3,41 +3,28 @@ package apiFactus.dto;
 import java.time.LocalDateTime;
 
 public class InvoiceListDTO {
-
     private Long id;
     private String invoiceNumber;
     private String invoiceUuid;
-    private CustomerDTO customer; // Use a nested DTO for customer
+    private CustomerDTO customer;
     private LocalDateTime createdAt;
     private String status;
 
-    public InvoiceListDTO(Long id, String invoiceNumber, String invoiceUuid, String customerName, LocalDateTime createdAt, String status) {
+    // Constructor vacío
+    public InvoiceListDTO() {}
+
+    // Constructor completo
+    public InvoiceListDTO(Long id, String invoiceNumber, String invoiceUuid,
+                          CustomerDTO customer, LocalDateTime createdAt, String status) {
         this.id = id;
         this.invoiceNumber = invoiceNumber;
         this.invoiceUuid = invoiceUuid;
-        this.customer = new CustomerDTO(customerName); // Simplified; adjust as needed
+        this.customer = customer;
         this.createdAt = createdAt;
         this.status = status;
     }
 
-    // Nested CustomerDTO class
-    public static class CustomerDTO {
-        private String name;
-
-        public CustomerDTO(String name) {
-            this.name = name;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-    }
-
-
+    // Getters y Setters
     public Long getId() {
         return id;
     }
@@ -84,5 +71,34 @@ public class InvoiceListDTO {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    // Clase interna CustomerDTO
+    public static class CustomerDTO {
+        private String company;
+        private String names;
+
+        public CustomerDTO() {}
+
+        public CustomerDTO(String company, String names) {
+            this.company = company;
+            this.names = names;
+        }
+
+        public String getCompany() {
+            return company;
+        }
+
+        public void setCompany(String company) {
+            this.company = company;
+        }
+
+        public String getNames() {
+            return names;
+        }
+
+        public void setNames(String names) {
+            this.names = names;
+        }
     }
 }
