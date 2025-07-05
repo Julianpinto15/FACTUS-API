@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: spring-backend
+    env: docker
+    plan: free
+    region: oregon
+    branch: main
+    repo: https://github.com/Julianpinto15/FACTUS-API.git
+    dockerContext: .
+    dockerfilePath: Dockerfile
+    autoDeploy: true
+    healthCheckPath: /
