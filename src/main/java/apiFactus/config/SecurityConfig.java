@@ -41,7 +41,9 @@ public class SecurityConfig {
                                 "/download-xml/{number}",
                                 "/validate/paginated",
                                 "/show/{number}",
-                                "/download-pdf/{number}").permitAll()
+                                "/download-pdf/{number}",
+                                "/api/products/{id}",
+                                "/api/customers/{identification}").permitAll()
                         .requestMatchers("/v1/bills/**").permitAll()
                         .anyRequest().authenticated()
                 )

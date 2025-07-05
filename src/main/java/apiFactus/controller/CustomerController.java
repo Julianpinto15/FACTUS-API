@@ -42,4 +42,19 @@ public class CustomerController {
         CustomerDTO customerDTO = customerService.getCustomerByIdentification(identification);
         return ResponseEntity.ok(customerDTO);
     }
+
+    @PutMapping("/{identification}")
+    public ResponseEntity<CustomerDTO> updateCustomer(
+            @PathVariable String identification,
+            @Valid @RequestBody CustomerDTO customerDTO) {
+        CustomerDTO updatedCustomer = customerService.updateCustomer(identification, customerDTO);
+        return ResponseEntity.ok(updatedCustomer);
+    }
+
+    @DeleteMapping("/{identification}")
+    public ResponseEntity<Void> deleteCustomer(@PathVariable String identification) {
+        customerService.deleteCustomer(identification);
+        return ResponseEntity.noContent().build();
+    }
+
 }

@@ -1,8 +1,9 @@
 package apiFactus.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
-
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name = "products")
 
@@ -34,7 +35,7 @@ public class Product {
     private Integer standardCodeId;
 
     @Column(name = "is_excluded")
-    private Integer isExcluded;
+    private Boolean isExcluded;
 
     @Column(name = "tribute_id")
     private Integer tributeId;
@@ -112,12 +113,12 @@ public class Product {
         this.standardCodeId = standardCodeId;
     }
 
-    public Integer getIsExcluded() {
+    public Boolean getExcluded() {
         return isExcluded;
     }
 
-    public void setIsExcluded(Integer isExcluded) {
-        this.isExcluded = isExcluded;
+    public void setExcluded(Boolean excluded) {
+        isExcluded = excluded;
     }
 
     public Integer getTributeId() {

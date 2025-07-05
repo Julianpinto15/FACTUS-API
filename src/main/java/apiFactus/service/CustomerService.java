@@ -136,4 +136,54 @@ public class CustomerService {
         response.put("total", customerPage.getTotalElements());
         return response;
     }
+
+    @Transactional
+    public CustomerDTO updateCustomer(String identification, @Valid CustomerDTO customerDTO) {
+        Customer existingCustomer = customerRepository.findByIdentification(identification);
+        if (existingCustomer == null) {
+            throw new IllegalArgumentException("Cliente con identificación " + identification + " no encontrado");
+        }
+
+        // Buscar entidades relacionadas
+        LegalOrganization legalOrganization = legalOrganizationRepository.findById(Integer.parseInt(customerDTO.getLegalOrganizationId()))
+                .orElseThrow(() -> new IllegalArgumentException("LegalOrganization con ID " + customerDTO.getLegalOrganizationId() + " no encontrada"));
+
+        Tribute tribute = tributeRepository.findById(Integer.parseInt(customerDTO.getTributeId()))
+                .orElseThrow(() -> new IllegalArgumentException("Tribute con ID " + customerDTO.getTributeId() + " no encontrado"));
+
+        Municipality municipality = municipalityRepository.findById(Integer.parseInt(customerDTO.getMunicipalityId()))
+                .orElseThrow(() -> new IllegalArgumentException("Municipality con ID " + customerDTO.getMunicipalityId() + " no encontrado"));
+
+        // Actualizar campos
+        existingCustomer.setIdentificationDocumentId(customerDTO.getIdentification_document_id());
+        existingCustomer.setIdentification(customerDTO.getIdentification());
+        existingCustomer.setDv(customerDTO.getDv());
+        existingCustomer.setGraphic_representation_name(customerDTO.getGraphic_representation_name());
+        existingCustomer.setCompany(customerDTO.getCompany());
+        existingCustomer.setTradeName(customerDTO.getTrade_name());
+        existingCustomer.setNames(customerDTO.getNames());
+        existingCustomer.setAddress(customerDTO.getAddress());
+        existingCustomer.setEmail(customerDTO.getEmail());
+        existingCustomer.setPhone(customerDTO.getPhone());
+        existingCustomer.setLegal_organization(legalOrganization);
+        existingCustomer.setTribute(tribute);
+        existingCustomer.setMunicipality(municipality);
+
+        // Guardar cambios
+        customerRepository.save(existingCustomer);
+
+        // Actualizar DTO con el identification correcto
+        customerDTO.setIdentification(identification);
+        return customerDTO;
+    }
+
+    @Transactional
+    public void deleteCustomer(String identification) {
+        Customer customer = customerRepository.findByIdentification(identification);
+        if (customer == null) {
+            throw new IllegalArgumentException("Cliente con identificación " + identification + " no encontrado");
+        }
+        customerRepository.delete(customer);
+    }
+
 }

@@ -56,7 +56,7 @@ public class ProductService {
                     existingProduct.setUnitMeasureId(productDetails.getUnitMeasureId());
                     existingProduct.setStandardCodeId(productDetails.getStandardCodeId());
                     existingProduct.setTributeId(productDetails.getTributeId());
-                    existingProduct.setIsExcluded(productDetails.getIsExcluded());
+                    existingProduct.setExcluded(productDetails.getExcluded());
 
                     return productRepository.save(existingProduct);
                 })
