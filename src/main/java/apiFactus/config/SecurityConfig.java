@@ -10,8 +10,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
-
-import java.util.Arrays;
+import java.util.Collections;
 
 @Configuration
 @EnableWebSecurity
@@ -20,7 +19,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors(Customizer.withDefaults()) // Usar configuración CORS por defecto
+                .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
                                 "/oauth/token", "/oauth/refresh", "/register", "/auth/google",
@@ -42,30 +41,24 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // IMPORTANTE: Usar setAllowedOriginPatterns en lugar de setAllowedOrigins
-        configuration.setAllowedOriginPatterns(Arrays.asList("https://factusfrontend.vercel.app"));
+        // CAMBIOS PRINCIPALES:
+        // 1. Usar tanto setAllowedOrigins como setAllowedOriginPatterns
+        configuration.setAllowedOrigins(Collections.singletonList("https://factusfrontend.vercel.app"));
+        configuration.setAllowedOriginPatterns(Arrays.asList("https://factusfrontend.vercel.app", "https://*.vercel.app"));
 
-        // Métodos HTTP permitidos
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));
+        // 2. Métodos HTTP permitidos - agregar PATCH si es necesario
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"));
 
-        // Headers permitidos - ser más específico
-        configuration.setAllowedHeaders(Arrays.asList(
-                "Authorization",
-                "Content-Type",
-                "X-Requested-With",
-                "Accept",
-                "Origin",
-                "Access-Control-Request-Method",
-                "Access-Control-Request-Headers"
-        ));
+        // 3. Headers permitidos - ser más permisivo inicialmente
+        configuration.setAllowedHeaders(Arrays.asList("*"));
 
-        // Permitir credenciales
+        // 4. Permitir credenciales - IMPORTANTE para autenticación
         configuration.setAllowCredentials(true);
 
-        // Exponer headers adicionales
-        configuration.setExposedHeaders(Arrays.asList("Authorization"));
+        // 5. Exponer headers adicionales
+        configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
 
-        // Tiempo de cache para preflight requests
+        // 6. Tiempo de cache para preflight requests
         configuration.setMaxAge(3600L);
 
         // Aplicar configuración a todas las rutas
