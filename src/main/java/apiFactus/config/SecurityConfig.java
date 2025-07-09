@@ -8,9 +8,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
+
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -18,35 +16,6 @@ import java.util.Collections;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-
-    @Bean
-    @Order(Ordered.HIGHEST_PRECEDENCE)
-    public CorsFilter corsFilter() {
-        CorsConfiguration config = new CorsConfiguration();
-
-        // Permitir el origen específico
-        config.setAllowedOrigins(Collections.singletonList("https://factusfrontend.vercel.app"));
-
-        // Métodos permitidos
-        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"));
-
-        // Headers permitidos
-        config.setAllowedHeaders(Arrays.asList("*"));
-
-        // Permitir credenciales
-        config.setAllowCredentials(true);
-
-        // Headers expuestos
-        config.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
-
-        // Tiempo de caché para preflight
-        config.setMaxAge(3600L);
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-
-        return new CorsFilter(source);
-    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -72,8 +41,6 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-
-        // Configuración específica
         configuration.setAllowedOrigins(Collections.singletonList("https://factusfrontend.vercel.app"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
