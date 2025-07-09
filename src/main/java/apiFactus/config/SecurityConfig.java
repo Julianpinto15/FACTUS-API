@@ -2,13 +2,16 @@ package apiFactus.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
+
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -17,9 +20,38 @@ import java.util.Collections;
 public class SecurityConfig {
 
     @Bean
+    @Order(Ordered.HIGHEST_PRECEDENCE)
+    public CorsFilter corsFilter() {
+        CorsConfiguration config = new CorsConfiguration();
+
+        // Permitir el origen específico
+        config.setAllowedOrigins(Collections.singletonList("https://factusfrontend.vercel.app"));
+
+        // Métodos permitidos
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"));
+
+        // Headers permitidos
+        config.setAllowedHeaders(Arrays.asList("*"));
+
+        // Permitir credenciales
+        config.setAllowCredentials(true);
+
+        // Headers expuestos
+        config.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
+
+        // Tiempo de caché para preflight
+        config.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+
+        return new CorsFilter(source);
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors(Customizer.withDefaults())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
                                 "/oauth/token", "/oauth/refresh", "/register", "/auth/google",
@@ -41,27 +73,14 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // CAMBIOS PRINCIPALES:
-        // 1. Usar tanto setAllowedOrigins como setAllowedOriginPatterns
+        // Configuración específica
         configuration.setAllowedOrigins(Collections.singletonList("https://factusfrontend.vercel.app"));
-        configuration.setAllowedOriginPatterns(Arrays.asList("https://factusfrontend.vercel.app", "https://*.vercel.app"));
-
-        // 2. Métodos HTTP permitidos - agregar PATCH si es necesario
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"));
-
-        // 3. Headers permitidos - ser más permisivo inicialmente
         configuration.setAllowedHeaders(Arrays.asList("*"));
-
-        // 4. Permitir credenciales - IMPORTANTE para autenticación
         configuration.setAllowCredentials(true);
-
-        // 5. Exponer headers adicionales
         configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
-
-        // 6. Tiempo de cache para preflight requests
         configuration.setMaxAge(3600L);
 
-        // Aplicar configuración a todas las rutas
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
 
