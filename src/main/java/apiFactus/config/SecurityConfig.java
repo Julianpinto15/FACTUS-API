@@ -16,8 +16,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-                .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Usa la configuración personalizada de CORS
+                .csrf(csrf -> csrf.disable()) // Deshabilita CSRF, como ya tienes
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Usa la configuración de CORS personalizada
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/oauth/token", "/oauth/refresh", "/register", "/auth/google",
@@ -36,13 +36,13 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOrigin("https://factusfrontend.vercel.app"); // Especifica el origen permitido
-        configuration.addAllowedMethod("*"); // Permite todos los métodos (GET, POST, etc.)
+        configuration.addAllowedOrigin("https://factusfrontend.vercel.app"); // Origen específico
+        configuration.addAllowedMethod("*"); // Permite todos los métodos (GET, POST, OPTIONS, etc.)
         configuration.addAllowedHeader("*"); // Permite todas las cabeceras
-        configuration.setAllowCredentials(true); // Permite credenciales (si es necesario)
+        configuration.setAllowCredentials(true); // Permite credenciales (cookies, tokens, etc.)
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
+        source.registerCorsConfiguration("/**", configuration); // Aplica a todas las rutas
         return source;
     }
 }
