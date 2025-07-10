@@ -39,7 +39,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Todos los orígenes necesarios
+        // Orígenes permitidos (actualizados)
         configuration.setAllowedOrigins(Arrays.asList(
                 "https://factusfrontend.vercel.app",
                 "http://localhost:3000",
@@ -66,6 +66,7 @@ public class SecurityConfig {
                 "Access-Control-Allow-Credentials"
         ));
 
+        // Configuración crítica para el funcionamiento con credenciales
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 
