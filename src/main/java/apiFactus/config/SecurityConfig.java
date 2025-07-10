@@ -10,6 +10,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 @Configuration
 @EnableWebSecurity
@@ -39,7 +40,15 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Orígenes permitidos (actualizados)
+        // Orígenes permitidos - usar setAllowedOriginPatterns para mayor flexibilidad
+        configuration.setAllowedOriginPatterns(Arrays.asList(
+                "https://factusfrontend.vercel.app",
+                "https://*.vercel.app",
+                "http://localhost:*",
+                "http://127.0.0.1:*"
+        ));
+
+        // También mantener los orígenes específicos
         configuration.setAllowedOrigins(Arrays.asList(
                 "https://factusfrontend.vercel.app",
                 "http://localhost:3000",
@@ -51,19 +60,13 @@ public class SecurityConfig {
                 "GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"
         ));
 
-        configuration.setAllowedHeaders(Arrays.asList(
-                "Authorization",
-                "Content-Type",
-                "X-Requested-With",
-                "Accept",
-                "Origin",
-                "Access-Control-Request-Method",
-                "Access-Control-Request-Headers"
-        ));
+        configuration.setAllowedHeaders(Collections.singletonList("*"));
 
         configuration.setExposedHeaders(Arrays.asList(
                 "Access-Control-Allow-Origin",
-                "Access-Control-Allow-Credentials"
+                "Access-Control-Allow-Credentials",
+                "Authorization",
+                "Content-Type"
         ));
 
         // Configuración crítica para el funcionamiento con credenciales
