@@ -10,6 +10,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -30,14 +31,14 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/", "/health", "/api/status", "/debug/**", // Endpoints públicos básicos
+                                "/", "/health", "/api/status", "/debug/**",
                                 "/oauth/token", "/oauth/refresh", "/register", "/auth/google",
                                 "/api/customers", "/api/products", "/api/unit-measures",
                                 "/api/standard-codes", "/api/municipalities", "/api/legal-organizations",
                                 "/api/tributes", "/v1/bills/validate", "/download-xml/{number}",
                                 "/validate/paginated", "/show/{number}", "/download-pdf/{number}",
                                 "/api/products/{id}", "/api/customers/{identification}",
-                                "/actuator/**" // Actuator endpoints para Railway
+                                "/actuator/**"
                         ).permitAll()
                         .requestMatchers("/v1/bills/**").permitAll()
                         .anyRequest().authenticated()
@@ -49,22 +50,8 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Construir lista de orígenes permitidos
-        List<String> origins = Arrays.asList(allowedOrigins.split(","));
-
-        // Agregar dominio de Railway si existe
-        if (railwayDomain != null && !railwayDomain.isEmpty()) {
-            origins.add("https://" + railwayDomain);
-        }
-
-        // Log para debugging (remover en producción)
-        System.out.println("CORS: Orígenes permitidos: " + origins);
-
-        // Configurar orígenes permitidos
-        configuration.setAllowedOrigins(origins);
-
-        // También usar patrones para mayor flexibilidad
-        configuration.setAllowedOriginPatterns(Arrays.asList(
+        // Crear una lista modificable
+        List<String> allowedPatterns = new ArrayList<>(Arrays.asList(
                 "https://factusfrontend.vercel.app",
                 "https://*.vercel.app",
                 "https://*.railway.app",
@@ -73,15 +60,17 @@ public class SecurityConfig {
                 "http://127.0.0.1:*"
         ));
 
-        // Métodos HTTP permitidos
-        configuration.setAllowedMethods(Arrays.asList(
-                "GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"
-        ));
+        // Agregar dominio de Railway si existe
+        if (railwayDomain != null && !railwayDomain.isEmpty()) {
+            allowedPatterns.add("https://" + railwayDomain);
+        }
 
-        // Headers permitidos - usar * para máxima compatibilidad
+        // Log para debugging
+        System.out.println("CORS: Patrones de orígenes permitidos: " + allowedPatterns);
+
+        configuration.setAllowedOriginPatterns(allowedPatterns);
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
-
-        // Headers expuestos
         configuration.setExposedHeaders(Arrays.asList(
                 "Access-Control-Allow-Origin",
                 "Access-Control-Allow-Credentials",
@@ -89,12 +78,9 @@ public class SecurityConfig {
                 "Content-Type",
                 "X-Requested-With"
         ));
-
-        // Configuraciones críticas
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 
-        // Registrar configuración para todas las rutas
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
