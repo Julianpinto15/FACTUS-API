@@ -18,12 +18,6 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Value("${CORS_ALLOWED_ORIGINS:https://factusfrontend.vercel.app,http://localhost:3000,http://localhost:4200}")
-    private String allowedOrigins;
-
-    @Value("${RAILWAY_PUBLIC_DOMAIN:#{null}}")
-    private String railwayDomain;
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
@@ -49,37 +43,20 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-
-        // Crear una lista modificable
-        List<String> allowedPatterns = new ArrayList<>(Arrays.asList(
+        configuration.setAllowedOrigins(Arrays.asList(
                 "https://factusfrontend.vercel.app",
-                "https://*.vercel.app",
-                "https://*.railway.app",
-                "https://*.up.railway.app",
-                "http://localhost:*",
-                "http://127.0.0.1:*"
+                "http://localhost:3000",
+                "http://localhost:3001",
+                "http://localhost:4200"
         ));
-
-        // Agregar dominio de Railway si existe
-        if (railwayDomain != null && !railwayDomain.isEmpty()) {
-            allowedPatterns.add("https://" + railwayDomain);
-        }
-
-        // Log para debugging
-        System.out.println("CORS: Patrones de orígenes permitidos: " + allowedPatterns);
-
-        configuration.setAllowedOriginPatterns(allowedPatterns);
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"));
+        configuration.setAllowedMethods(Arrays.asList("*"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setExposedHeaders(Arrays.asList(
-                "Access-Control-Allow-Origin",
-                "Access-Control-Allow-Credentials",
                 "Authorization",
-                "Content-Type",
-                "X-Requested-With"
+                "Access-Control-Allow-Origin",
+                "Access-Control-Allow-Credentials"
         ));
         configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
