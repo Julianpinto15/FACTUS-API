@@ -39,19 +39,18 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Permitir múltiples orígenes
+        // Todos los orígenes necesarios
         configuration.setAllowedOrigins(Arrays.asList(
                 "https://factusfrontend.vercel.app",
-                "http://localhost:4200",
-                "http://localhost:3001"
+                "http://localhost:3000",
+                "http://localhost:3001",
+                "http://localhost:4200"
         ));
 
-        // Permitir métodos específicos
         configuration.setAllowedMethods(Arrays.asList(
                 "GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"
         ));
 
-        // Permitir headers específicos
         configuration.setAllowedHeaders(Arrays.asList(
                 "Authorization",
                 "Content-Type",
@@ -62,14 +61,13 @@ public class SecurityConfig {
                 "Access-Control-Request-Headers"
         ));
 
-        // Exponer headers específicos
         configuration.setExposedHeaders(Arrays.asList(
                 "Access-Control-Allow-Origin",
                 "Access-Control-Allow-Credentials"
         ));
 
         configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L); // Cache preflight response for 1 hour
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
