@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 public class PreflightController {
 
-    @CrossOrigin
     @RequestMapping(value = "/**", method = RequestMethod.OPTIONS)
     public ResponseEntity<?> handlePreflight() {
         return ResponseEntity.ok()
