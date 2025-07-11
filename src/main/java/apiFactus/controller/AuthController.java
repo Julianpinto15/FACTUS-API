@@ -7,9 +7,12 @@ import apiFactus.service.AuthService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 @RestController
 public class AuthController {
@@ -106,6 +109,14 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Autenticación con Google fallida: " + e.getMessage());
         }
     }
+
+    @Bean
+    public ApplicationRunner logEndpoints(RequestMappingHandlerMapping mapping) {
+        return args -> mapping.getHandlerMethods().forEach((info, method) ->
+                System.out.println("Ruta registrada: " + info)
+        );
+    }
+
 
 }
 

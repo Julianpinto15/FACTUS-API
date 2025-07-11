@@ -1,0 +1,10 @@
+services:
+  - name: spring-backend
+    type: web
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: Dockerfile
+    dockerContext: .
+    healthCheckPath: /oauth/token
+    autoDeploy: true
