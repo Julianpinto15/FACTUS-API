@@ -27,6 +27,7 @@ public class AuthController {
         this.authService = authService;
     }
 
+    @CrossOrigin(origins = "https://factusfrontend.vercel.app", allowCredentials = "true")
     @PostMapping("/oauth/token")
     public ResponseEntity<?> getToken(
             @RequestParam(defaultValue = "password") String grant_type,
@@ -51,6 +52,7 @@ public class AuthController {
         }
     }
 
+    @CrossOrigin(origins = "https://factusfrontend.vercel.app", allowCredentials = "true")
     @PostMapping("/oauth/refresh")
     public ResponseEntity<?> refreshToken(
             @RequestParam String client_id,
@@ -77,6 +79,7 @@ public class AuthController {
         }
     }
 
+    @CrossOrigin(origins = "https://factusfrontend.vercel.app", allowCredentials = "true")
     @PostMapping("/register")
     public ResponseEntity<?> register(
             @RequestParam String username,
@@ -94,6 +97,7 @@ public class AuthController {
         }
     }
 
+    @CrossOrigin(origins = "https://factusfrontend.vercel.app", allowCredentials = "true")
     @PostMapping("/auth/google")
     public ResponseEntity<?> googleSignIn(@RequestBody GoogleSignInRequest request) {
         logger.debug("Recibida solicitud de autenticación con Google: email={}", request.getEmail());
