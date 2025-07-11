@@ -41,13 +41,19 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
+
+        // Agregar todos los dominios necesarios
         configuration.setAllowedOriginPatterns(List.of(
                 "https://factusfrontend.vercel.app",
-                "http://localhost:4200"
+                "https://*.vercel.app",  // Para otros despliegues de Vercel
+                "https://*.railway.app", // Para Railway
+                "http://localhost:4200",
+                "http://localhost:3000"
         ));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
-        configuration.setExposedHeaders(List.of("Authorization"));
+        configuration.setExposedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 
@@ -55,6 +61,4 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-
-
 }

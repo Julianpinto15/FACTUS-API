@@ -6,8 +6,13 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 public class PreflightController {
 
+    @CrossOrigin
     @RequestMapping(value = "/**", method = RequestMethod.OPTIONS)
     public ResponseEntity<?> handlePreflight() {
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok()
+                .header("Access-Control-Allow-Origin", "*")
+                .header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+                .header("Access-Control-Allow-Headers", "*")
+                .build();
     }
 }
