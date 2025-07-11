@@ -6,5 +6,5 @@ services:
     region: oregon
     dockerfilePath: Dockerfile
     dockerContext: .
-    healthCheckPath: /oauth/token
+    healthCheckPath: /health
     autoDeploy: true

@@ -27,7 +27,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/oauth/token", "/oauth/refresh", "/register", "/auth/google",
-                                "/api/**", "/v1/**", "/download-**", "/validate/**", "/show/**"
+                                "/api/**","/health", "/v1/**", "/download-**", "/validate/**", "/show/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
