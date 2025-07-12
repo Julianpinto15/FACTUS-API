@@ -3,7 +3,7 @@ services:
     type: web
     runtime: docker
     plan: free
-    region: oregon
+    region: US East (Virginia, USA)
     dockerfilePath: Dockerfile
     dockerContext: .
     healthCheckPath: /health
