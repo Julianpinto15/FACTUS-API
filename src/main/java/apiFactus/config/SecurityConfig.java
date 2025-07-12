@@ -44,7 +44,7 @@ public class SecurityConfig {
 
         // Agregar todos los dominios necesarios
         configuration.setAllowedOriginPatterns(List.of(
-                "factusfrontend.vercel.app",
+                "https://factusfrontend.vercel.app",
                 "https://*.vercel.app",  // Para otros despliegues de Vercel
                 "https://*.railway.app", // Para Railway
                 "http://localhost:4200",
