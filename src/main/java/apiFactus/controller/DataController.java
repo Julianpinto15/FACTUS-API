@@ -32,8 +32,6 @@ public class DataController {
     @Autowired
     private UnitMeasureRepository unitMeasureRepository;
 
-
-
     public DataController(DataPersistenceService dataPersistenceService) {
         this.dataPersistenceService = dataPersistenceService;
     }
@@ -57,6 +55,7 @@ public class DataController {
     public ResponseEntity<List<Tribute>> getTributes() {
         return ResponseEntity.ok(tributeRepository.findAll());
     }
+
 
     @GetMapping("/unit-measures")
     public ResponseEntity<List<UnitMeasure>> getUnitMeasures() {

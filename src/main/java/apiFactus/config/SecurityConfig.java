@@ -26,22 +26,8 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/register",
-                                "/auth/google",
-                                "/api/customers",
-                                "/api/products",
-                                "/api/unit-measures",
-                                "/api/standard-codes",
-                                "/api/municipalities",
-                                "/api/legal-organizations",
-                                "/api/tributes",
-                                "/v1/bills/validate",
-                                "/download-xml/{number}",
-                                "/validate/paginated",
-                                "/show/{number}",
-                                "/download-pdf/{number}",
-                                "/api/products/{id}",
-                                "/api/customers/{identification}", "/show/**","/health"
+                                "/oauth/token","/v1/bills", "/v1/bills/**", "/oauth/refresh", "/register", "/auth/google",
+                                "/api/**","/health", "/v1/**", "/download-**", "/validate/**", "/show/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
