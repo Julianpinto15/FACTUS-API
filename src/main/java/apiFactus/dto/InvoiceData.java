@@ -1,12 +1,14 @@
 package apiFactus.dto;
 
 import apiFactus.model.Customer;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hibernate.cache.spi.support.AbstractReadWriteAccess;
 
 import java.util.List;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class InvoiceData {
 
     @JsonProperty("company")
