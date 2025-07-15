@@ -74,44 +74,25 @@ public class InvoiceService {
 
         try {
             logger.debug("Enviando solicitud para crear factura a: {}", apiUrl + "/v1/bills/validate");
-
-            // CAMBIO: Usar String en lugar de InvoiceResponseDTO para capturar el JSON crudo
-            ResponseEntity<String> response = restTemplate.postForEntity(
+            ResponseEntity<InvoiceResponseDTO> response = restTemplate.postForEntity(
                     apiUrl + "/v1/bills/validate",
                     request,
-                    String.class);
+                    InvoiceResponseDTO.class);
 
-            String responseBody = response.getBody();
-            logger.debug("Respuesta JSON cruda de la API: {}", responseBody);
-            logger.debug("Status code: {}", response.getStatusCode());
-            logger.debug("Headers: {}", response.getHeaders());
+            InvoiceResponseDTO responseBody = response.getBody();
+            logger.debug("Respuesta completa de la API: {}", responseBody);
 
-            // Intentar deserializar manualmente
-            try {
-                InvoiceResponseDTO responseDto = objectMapper.readValue(responseBody, InvoiceResponseDTO.class);
-                logger.debug("Deserialización exitosa: {}", responseDto);
-
-                if (responseDto != null && "Created".equals(responseDto.getStatus())) {
-                    logger.debug("Factura creada: status_code=201, invoice_id={}",
-                            responseDto.getData() != null && responseDto.getData().getBill() != null
-                                    ? responseDto.getData().getBill().getId() : "N/A");
-                    saveInvoiceToDatabase(invoiceRequest, responseDto);
-                    return responseDto;
-                } else {
-                    logger.warn("Respuesta inválida de la API: status_code={}, message={}",
-                            response.getStatusCodeValue(), responseDto != null ? responseDto.getMessage() : "Respuesta nula");
-                    return responseDto;
-                }
-            } catch (Exception deserializationException) {
-                logger.error("Error de deserialización: {}", deserializationException.getMessage(), deserializationException);
-
-                // Crear respuesta de error
-                InvoiceResponseDTO errorResponse = new InvoiceResponseDTO();
-                errorResponse.setStatus("Error");
-                errorResponse.setMessage("Error de deserialización: " + deserializationException.getMessage());
-                return errorResponse;
+            if (responseBody != null && "Created".equals(responseBody.getStatus())) {
+                logger.debug("Factura creada: status_code=201, invoice_id={}",
+                        responseBody.getData() != null && responseBody.getData().getBill() != null
+                                ? responseBody.getData().getBill().getId() : "N/A");
+                saveInvoiceToDatabase(invoiceRequest, responseBody);
+                return responseBody;
+            } else {
+                logger.warn("Respuesta inválida de la API: status_code={}, message={}",
+                        response.getStatusCodeValue(), responseBody != null ? responseBody.getMessage() : "Respuesta nula");
+                return responseBody;
             }
-
         } catch (HttpClientErrorException.Unauthorized e) {
             logger.warn("Error de autorización: status_code=401, intentando refrescar token");
             authService.refreshToken();
@@ -119,30 +100,19 @@ public class InvoiceService {
             request = new HttpEntity<>(invoiceRequest, headers);
 
             logger.debug("Reintentando solicitud para crear factura a: {}", apiUrl + "/v1/bills/validate");
-
-            // Mismo cambio para el retry
-            ResponseEntity<String> retryResponse = restTemplate.postForEntity(
+            ResponseEntity<InvoiceResponseDTO> retryResponse = restTemplate.postForEntity(
                     apiUrl + "/v1/bills/validate",
                     request,
-                    String.class);
+                    InvoiceResponseDTO.class);
 
-            String retryResponseBody = retryResponse.getBody();
-            logger.debug("Respuesta de reintento JSON cruda: {}", retryResponseBody);
+            InvoiceResponseDTO retryResponseBody = retryResponse.getBody();
+            logger.debug("Respuesta de reintento: status_code={}, body={}",
+                    retryResponse.getStatusCodeValue(), retryResponseBody);
 
-            try {
-                InvoiceResponseDTO retryResponseDto = objectMapper.readValue(retryResponseBody, InvoiceResponseDTO.class);
-                if (retryResponseDto != null && "Created".equals(retryResponseDto.getStatus())) {
-                    saveInvoiceToDatabase(invoiceRequest, retryResponseDto);
-                }
-                return retryResponseDto;
-            } catch (Exception deserializationException) {
-                logger.error("Error de deserialización en retry: {}", deserializationException.getMessage(), deserializationException);
-                InvoiceResponseDTO errorResponse = new InvoiceResponseDTO();
-                errorResponse.setStatus("Error");
-                errorResponse.setMessage("Error de deserialización en retry: " + deserializationException.getMessage());
-                return errorResponse;
+            if (retryResponseBody != null && "Created".equals(retryResponseBody.getStatus())) {
+                saveInvoiceToDatabase(invoiceRequest, retryResponseBody);
             }
-
+            return retryResponseBody;
         } catch (HttpClientErrorException e) {
             logger.error("Error en la API: status_code={}, message={}",
                     e.getStatusCode().value(), e.getResponseBodyAsString());
