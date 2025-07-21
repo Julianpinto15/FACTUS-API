@@ -17,8 +17,8 @@ public class InvoiceResponseDTO {
     @JsonProperty("data")
     private InvoiceData data;
 
-    @JsonProperty("billing_period")
-    private Object billingPeriod;
+    /*@JsonProperty("billing_period")
+    private Object billingPeriod;*/
 
     public InvoiceResponseDTO() {
     }
@@ -47,11 +47,11 @@ public class InvoiceResponseDTO {
         this.data = data;
     }
 
-    public Object getBillingPeriod() {
+    /*public Object getBillingPeriod() {
         return billingPeriod;
     }
 
     public void setBillingPeriod(Object billingPeriod) {
         this.billingPeriod = billingPeriod;
-    }
+    }*/
 }

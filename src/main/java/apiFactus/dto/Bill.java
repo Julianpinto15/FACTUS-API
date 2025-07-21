@@ -3,6 +3,7 @@ package apiFactus.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
+import java.util.Map;
 
 public class Bill {
 
@@ -55,7 +56,8 @@ public class Bill {
     private String observation;
 
     @JsonProperty("errors")
-    private List<String> errors;
+    private Map<String, Object> errors;
+
 
     @JsonProperty("created_at")
     private String createdAt;
@@ -216,11 +218,11 @@ public class Bill {
         this.observation = observation;
     }
 
-    public List<String> getErrors() {
+    public Map<String, Object> getErrors() {
         return errors;
     }
 
-    public void setErrors(List<String> errors) {
+    public void setErrors(Map<String, Object> errors) {
         this.errors = errors;
     }
 
